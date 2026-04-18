@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BookNest - Catalog</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+</head>
+<body>
+
+<div class="user-menu">
+    <div th:if="${currentUser != null}">
+        <a th:href="@{/profile}" class="btn btn-primary">Profile</a>
+        <a th:href="@{/logout}" class="btn btn-danger">Logout</a>
+    </div>
+    <div th:unless="${currentUser != null}">
+        <a th:href="@{/login}" class="btn btn-primary">Log in</a>
+        <a th:href="@{/register}" class="btn btn-success">Register</a>
+    </div>
+</div>
+
+<h2 class="main-title">BookNest</h2>
+
+<form th:action="@{/}" method="get" class="search-form">
+    <input type="text" name="search" placeholder="Search by title..." th:value="${param.search}">
+
+    <select name="author">
+        <option value="">-- Author --</option>
+        <option th:each="a : ${authors}"
+                th:value="${a.id}"
+                th:text="${a.name}"
+                th:selected="${#strings.equals(param.author, a.id)}"></option>
+    </select>
+
+    <select name="genre">
+        <option value="">-- Genre --</option>
+        <option th:each="g : ${genres}"
+                th:value="${g.id}"
+                th:text="${g.name}"
+                th:selected="${#strings.equals(param.genre, g.id)}"></option>
+    </select>
+
+    <button type="submit">Search</button>
+</form>
+
+<div class="results-container">
+
+    <h3 th:if="${localBooks != null}">Books from our Library</h3>
+    <div class="books-grid">
+        <div th:each="book : ${localBooks}" class="book-card">
+            <a th:href="@{/book/{id}(id=${book.id})}">
+                <img th:src="${book.coverUrl}" class="book-cover" alt="cover">
+            </a>
+            <div class="book-details">
+                <a th:href="@{/book/{id}(id=${book.id})}" class="book-title">
+                    <strong th:text="${book.title}">Title</strong>
+                </a>
+                <span class="book-author">Author:
+                    <span th:each="author, iter : ${book.authors}"
+                          th:text="${author.name} + ${!iter.last ? ', ' : ''}"></span>
+                </span>
+                <div class="rating-box" th:if="${book.reviews != null and !#lists.isEmpty(book.reviews)}">
+                    <div class="stars">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}" th:text="${i <= book.averageRating ? '⭐' : '☆'}"></span>
+                    </div>
+                    <div class="rating-info">
+                        <span th:text="${book.averageRating}">4.5</span> / 5<br>
+                        <span th:text="${#lists.size(book.reviews)} + ' reviews'">10 reviews</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 th:if="${externalBooks != null and !#lists.isEmpty(externalBooks)}">Found in OpenLibrary</h3>
+    <div class="books-grid external">
+        <div th:each="extBook : ${externalBooks}" class="book-card external">
+            <a th:href="@{/book/{id}(id=${extBook.openLibraryId} + '?authorName=' + ${extBook.authorName})}">
+                <img th:src="${extBook.coverUrl}" class="book-cover" alt="cover">
+            </a>
+            <div class="book-details">
+                <a class="book-title"
+                   th:href="@{'/book/' + ${extBook.openLibraryId} + '?authorName=' + ${extBook.authorName}}"
+                   th:text="${extBook.title}">
+                    Book Title
+                </a>
+                <p class="book-author" th:text="${extBook.authorName}">Author Name</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

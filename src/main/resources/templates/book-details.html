@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isLocal ? book.title : externalBook.title}">Book Details</title>
+    <link rel="stylesheet" th:href="@{/css/book.css}">
+</head>
+<body>
+
+<div class="user-menu">
+    <a th:href="@{/}" class="back-link" style="margin-right: 20px;">← Back to Catalog</a>
+    <div th:if="${currentUser != null}">
+        <a th:href="@{/profile}" class="btn-menu btn-blue">Profile</a>
+        <a th:href="@{/logout}" class="btn-menu btn-red-dark">Logout</a>
+    </div>
+</div>
+
+<div class="details-wrapper">
+    <div class="side-panel">
+        <img th:if="${isLocal}" th:src="${book.coverUrl}" class="book-cover" alt="Cover">
+
+        <img th:if="${!isLocal}"
+             th:src="${externalBook['cover_id'] != null ? 'https://covers.openlibrary.org/b/id/' + externalBook['cover_id'] + '-L.jpg' : 'https://via.placeholder.com/300x450?text=No+Cover'}"
+             class="book-cover" alt="Cover">
+
+        <div class="action-btns">
+            <button class="btn-action btn-cyan">Want to Read</button>
+
+            <a th:if="${iaId != null}"
+               th:href="'https://archive.org/details/' + ${iaId}"
+               target="_blank"
+               class="btn-action btn-green-reg"
+               style="text-align: center; text-decoration: none;">
+                Read Online
+            </a>
+        </div>
+
+        <div class="collection-form" th:if="${currentUser != null}">
+            <span class="collection-label">Add to collection:</span>
+            <form class="select-wrapper">
+                <select class="select-dark">
+                    <option>Favorites</option>
+                    <option>Reading</option>
+                    <option>Completed</option>
+                </select>
+                <button type="submit" class="btn-save">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 th:text="${isLocal ? book.title : externalBook.title}">Book Title</h1>
+
+        <div class="tags-container">
+            <th:block th:if="${isLocal and book != null}">
+                <span class="tag" th:each="author : ${book.authors}" th:text="${author.name}">Author</span>
+            </th:block>
+
+            <th:block th:if="${not isLocal and externalBook != null}">
+                <span class="tag" th:each="subject : ${externalBook['subjects']}" th:text="${subject}">Subject</span>
+            </th:block>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+
+        <h3>Description</h3>
+        <p class="description-text" th:text="${book.description != null ? book.description : 'No description available in Database.'}"></p>
+
+        <div th:if="${isLocal and !#lists.isEmpty(book.reviews)}" style="margin-top: 40px;">
+            <h3>Reviews</h3>
+            <div th:each="review : ${book.reviews}" class="review-card">
+                <p th:text="${review.comment}">Review text</p>
+                <small th:text="'Rating: ' + ${review.rating} + '/5'"></small>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
