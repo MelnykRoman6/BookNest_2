@@ -20,7 +20,7 @@ public class Collection {
 
     @ManyToOne
     @JoinColumn(name = "id_user", nullable = false)
-    private User owner;
+    private Users users;
 
     @ManyToMany
     @JoinTable(

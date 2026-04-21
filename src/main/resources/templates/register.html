@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration - BookNest</title>
+    <link rel="stylesheet" th:href="@{/styles/login.css}">
+</head>
+<body>
+
+<div class="auth-container">
+    <h2>Registration</h2>
+
+    <form th:action="@{/register/send-code}" method="post" class="auth-form">
+        <label>Email:</label>
+        <div class="email-row" style="display: flex; gap: 10px;">
+            <input type="email" name="email"
+                   th:value="${tempEmail}"
+                   required placeholder="Enter your email"
+                   style="flex-grow: 1;">
+            <button type="submit" class="btn-auth" style="width: auto; padding: 0 15px;">Send</button>
+        </div>
+        <div th:if="${msg}" class="sent-conf" style="color: green; margin-top: 10px;" th:text="${msg}"></div>
+    </form>
+
+    <hr class="hr" style="margin: 20px 0;">
+
+    <form th:action="@{/register/confirm}" method="post" class="auth-form">
+        <label>Code received:</label>
+        <input type="text" name="ver_code" placeholder="123456" required>
+
+        <label>Select password:</label>
+        <input type="password" name="password" placeholder="Min. 6 characters" required>
+
+        <button type="submit" class="btn-auth" style="background: #28a745; margin-top: 20px;">
+            Create account
+        </button>
+
+        <div th:if="${error}" class="error-msg" style="color: red; margin-top: 15px;" th:text="${error}"></div>
+    </form>
+
+    <p style="margin-top: 20px; text-align: center;">
+        Already have an account? <a th:href="@{/login}">Login here</a>
+    </p>
+</div>
+
+</body>
+</html>

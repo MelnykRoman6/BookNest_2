@@ -4,7 +4,7 @@ import org.example.booknest_2.dto.ExternalBookDTO;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
 import org.example.booknest_2.model.SearchHistory;
-import org.example.booknest_2.model.User;
+import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.AuthorRepository;
 import org.example.booknest_2.repository.BookRepository;
 import org.example.booknest_2.repository.SearchHistoryRepository;
@@ -28,14 +28,14 @@ public class BookService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public List<Book> searchLocalBooks(String title, Long authorId, Long genreId, User currentUser) {
+    public List<Book> searchLocalBooks(String title, Long authorId, Long genreId, Users currentUser) {
         if (currentUser != null && title != null && !title.isEmpty()) {
             saveSearchHistory(currentUser, title);
         }
         return bookRepository.searchBooks(title, authorId, genreId);
     }
 
-    private void saveSearchHistory(User user, String query) {
+    private void saveSearchHistory(Users user, String query) {
         // Проверяем, не искал ли юзер это же самое в последние 24 часа
         // (Аналог твоей проверки CURDATE() в PHP)
         LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);

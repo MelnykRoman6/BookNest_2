@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GenreRepository extends JpaRepository<Genre, Long> {
-    // Аналогично, базовых методов Spring Data нам хватит для начала
+
 }

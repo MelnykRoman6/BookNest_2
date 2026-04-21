@@ -1,0 +1,25 @@
+<div class="container">
+    <div class="section">
+        <h2>My profile</h2>
+        <div class="info-box">
+            <p><strong>Email:</strong> <span th:text="${user.email}">user@example.com</span></p>
+            <p><strong>Member from:</strong> <span th:text="${#temporals.format(user.dateReg, 'dd/MM/yyyy')}">01/01/2026</span></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>My collections</h3>
+        <div th:each="col : ${user.collections}" class="list-col">
+            <div class="list-item collapsible-header" th:onclick="'toggleCollection(' + ${col.id} + ')'">
+                <strong th:text="${col.name}">Collection Name</strong>
+                <span class="badge-count" th:text="${col.totalBooks} + ' books'">5 books</span>
+            </div>
+
+            <div th:id="'col-' + ${col.id}" class="books-content" style="display:none;">
+                <div th:each="book : ${col.books}" class="book-item">
+                    <a th:href="@{/book/{id}(id=${book.openLibraryId})}" th:text="${book.title}">Book Title</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -22,7 +22,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "id_user", nullable = false)
-    private User user;
+    private Users user;
 
     @ManyToOne
     @JoinColumn(name = "id_book", nullable = false)

@@ -23,5 +23,5 @@ public class SearchHistory {
 
     @ManyToOne
     @JoinColumn(name = "id_user", nullable = false)
-    private User user;
+    private Users user;
 }

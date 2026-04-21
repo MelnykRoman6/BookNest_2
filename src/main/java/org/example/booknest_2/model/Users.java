@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "user_acc")
 @Getter
 @Setter
-public class User {
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +31,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Review> reviews;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
     private Set<Collection> collections;
 
     @ManyToMany
     @JoinTable(
-            name = "save",
+            name = "user_save",
             joinColumns = @JoinColumn(name = "id_user"),
             inverseJoinColumns = @JoinColumn(name = "id_book")
     )
@@ -44,4 +44,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<SearchHistory> searchHistory;
+
+    public LocalDateTime getDateReg() {
+        return registrationDate;
+    }
+
+    public void setDateReg(LocalDateTime now) {
+        registrationDate = now;
+    }
 }
