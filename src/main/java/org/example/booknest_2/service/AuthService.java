@@ -39,20 +39,22 @@ public class AuthService {
         message.setText("Your code: " + code);
 
         mailSender.send(message);
-        System.out.println("verif end");
+        System.out.println("verif sent end");
     }
 
     @Transactional
     public void registerUser(String password, HttpSession session) {
+        System.out.println("register user in");
         Users newUser = new Users();
         String email = (String) session.getAttribute("temp_email");
+        System.out.println("got email: " + email);
         if (email != null) {
             newUser.setEmail(email);
         }
-        newUser.setPasswordHash(passwordEncoder.encode(password));
         newUser.setVerified(true);
+        newUser.setPasswordHash(passwordEncoder.encode(password));
         newUser.setDateReg(LocalDateTime.now());
-        newUser = userRepository.saveAndFlush(newUser);
+        newUser = userRepository.save(newUser);
 
         List<String> baseCollections = List.of("Reading", "Finished", "I want to read", "Favorites");
         for (String name : baseCollections) {
