@@ -37,8 +37,8 @@ public class Users {
     @ManyToMany
     @JoinTable(
             name = "user_save",
-            joinColumns = @JoinColumn(name = "id_user"),
-            inverseJoinColumns = @JoinColumn(name = "id_book")
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
     )
     private Set<Book> savedBooks;
 

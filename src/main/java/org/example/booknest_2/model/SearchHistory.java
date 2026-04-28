@@ -22,6 +22,6 @@ public class SearchHistory {
     private LocalDateTime searchDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_user", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 }

@@ -19,14 +19,14 @@ public class Collection {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "id_user", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users users;
 
     @ManyToMany
     @JoinTable(
             name = "add",
-            joinColumns = @JoinColumn(name = "id_collection"),
-            inverseJoinColumns = @JoinColumn(name = "id_book")
+            joinColumns = @JoinColumn(name = "collection_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
     )
     private Set<Book> books;
 }

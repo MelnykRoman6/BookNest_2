@@ -21,6 +21,6 @@ public class Format {
     private String url;
 
     @ManyToOne
-    @JoinColumn(name = "id_book", nullable = false)
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 }

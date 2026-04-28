@@ -21,10 +21,10 @@ public class Review {
     private String comment;
 
     @ManyToOne
-    @JoinColumn(name = "id_user", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @ManyToOne
-    @JoinColumn(name = "id_book", nullable = false)
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 }
