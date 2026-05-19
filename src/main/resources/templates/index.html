@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="it">
 <head>
     <meta charset="UTF-8">
     <title>BookNest - Catalog</title>
@@ -8,14 +9,23 @@
 <body>
 
 <div class="user-menu">
-    <div th:if="${currentUser != null}">
-        <a th:href="@{/profile}" class="btn btn-primary">Profile</a>
-        <a th:href="@{/logout}" class="btn btn-danger">Logout</a>
-    </div>
-    <div th:unless="${currentUser != null}">
-        <a th:href="@{/login}" class="btn btn-primary">Log in</a>
+
+    <div sec:authorize="isAnonymous()">
+        <a th:href="@{/login}" class="btn btn-primary">Log In</a>
         <a th:href="@{/register}" class="btn btn-success">Register</a>
     </div>
+
+    <div sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 15px;">
+
+        <a th:href="@{/profile}" class="btn btn-primary">My Profile</a>
+
+        <form th:action="@{/logout}" method="POST" style="margin: 0;">
+            <button type="submit" class="btn btn-danger" style="background: #dc3545; color: white; border: none; padding: 8px 12px; cursor: pointer;">
+                Log Out
+            </button>
+        </form>
+    </div>
+
 </div>
 
 <h2 class="main-title">BookNest</h2>

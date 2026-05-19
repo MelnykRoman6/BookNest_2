@@ -7,10 +7,16 @@ import org.example.booknest_2.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.*;
 
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    public static List<CollectionDTO> getCollectionsByEmail(String username) {
+        return null;
+    }
 
     public ProfileDTO getUserProfileData(Long userId) {
         Users user = userRepository.findById(userId)

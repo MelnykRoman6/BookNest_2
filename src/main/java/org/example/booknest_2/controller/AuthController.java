@@ -34,8 +34,13 @@ public class AuthController {
         return "register";
     }
 
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register";
+    }
+
     @GetMapping("/login")
     public String loginPage() {
-        return "register";
+        return "login";
     }
 }

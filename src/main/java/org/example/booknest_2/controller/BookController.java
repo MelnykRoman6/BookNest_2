@@ -1,14 +1,20 @@
 package org.example.booknest_2.controller;
 
+import org.example.booknest_2.dto.CollectionDTO;
 import org.example.booknest_2.model.Book;
 import org.example.booknest_2.repository.*;
 import org.example.booknest_2.service.BookService;
+import org.example.booknest_2.service.CollectionService;
+import org.example.booknest_2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +31,22 @@ public class BookController {
     private GenreRepository genreRepository;
     @Autowired
     private BookRepository bookRepository;
+    @Autowired
+    private CollectionService collectionService;
+
+    @PostMapping("/add-book")
+    public String addBookToCollection(@RequestParam Long bookId,
+                                      @RequestParam Long collectionId,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            collectionService.addBookToCollection(bookId, collectionId);
+            redirectAttributes.addFlashAttribute("successMessage", "Book successfully added!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+        }
+
+        return "redirect:/book/" + bookId;
+    }
 
     @GetMapping("/")
     public String index(@RequestParam(required = false) String search,
@@ -47,13 +69,13 @@ public class BookController {
             }
         }
 
-        return "index"; // Ищет файл src/main/resources/templates/index.html
+        return "index";
     }
     @GetMapping("/book/{id}")
     public String showBookDetails(@PathVariable String id,
                                   @RequestParam(required = false) String ia,
                                   @RequestParam(value = "authorName", required = false) String authorName,
-                                  Model model) {
+                                  Model model, @AuthenticationPrincipal UserDetails currentUser) {
 
         // 1. Ищем в базе: либо по нашему ID (Long), либо по OpenLibrary ID (String)
         Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
@@ -82,6 +104,12 @@ public class BookController {
         } else {
             // Если API не ответило, можно показать страницу ошибки или заглушку
             return "error/404";
+        }
+
+        if (currentUser != null) {
+            // Ищем коллекции юзера по его email
+            List<CollectionDTO> userCollections = UserService.getCollectionsByEmail(currentUser.getUsername());
+            model.addAttribute("collections", userCollections);
         }
 
         model.addAttribute("iaId", ia);

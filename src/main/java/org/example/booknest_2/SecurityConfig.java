@@ -19,8 +19,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .loginPage("/login")             // Наш GET-маппинг для показа страницы
+                        .loginProcessingUrl("/login")     // На этот URL форма шлет POST-запрос
+                        .defaultSuccessUrl("/", true)    // Куда перенаправить при успешном входе (например, на главную)
+                        .failureUrl("/login?error=true") // Куда кинуть при ошибке
                         .permitAll()
                 )
                 .logout(logout -> logout

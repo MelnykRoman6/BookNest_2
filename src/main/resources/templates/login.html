@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - BookNest</title>
+    <link rel="stylesheet" th:href="@{/css/style_login.css}">
+</head>
+<body>
+
+<div class="auth-container">
+    <form th:action="@{/login}" method="POST" class="auth-form">
+        <h2>Login BookNest</h2>
+
+        <div th:if="${param.error}" class="error-msg" style="color: red; margin-bottom: 15px;">
+            Incorrect email or password!
+        </div>
+
+        <div th:if="${param.logout}" class="success-msg" style="color: green; margin-bottom: 15px;">
+            You have been logged out successfully.
+        </div>
+
+        <label>Email:</label>
+        <input type="email" name="username" required placeholder="Enter your email">
+
+        <label>Password:</label>
+        <input type="password" name="password" required placeholder="Enter your password">
+
+        <button type="submit" class="btn-auth">Log in</button>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a th:href="@{/register}">Register</a></p>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

@@ -24,8 +24,6 @@
              class="book-cover" alt="Cover">
 
         <div class="action-btns">
-            <button class="btn-action btn-cyan">Want to Read</button>
-
             <a th:if="${iaId != null}"
                th:href="'https://archive.org/details/' + ${iaId}"
                target="_blank"
@@ -35,18 +33,24 @@
             </a>
         </div>
 
-        <div class="collection-form" th:if="${currentUser != null}">
+        <div class="collection-form" th:if="${collections != null and !collections.empty}">
             <span class="collection-label">Add to collection:</span>
-            <form class="select-wrapper">
-                <select class="select-dark">
-                    <option>Favorites</option>
-                    <option>Reading</option>
-                    <option>Completed</option>
+
+            <form th:action="@{/collection/add-book}" method="POST" class="select-wrapper">
+                <input type="hidden" name="bookId" th:value="${book.id}" />
+
+                <select class="select-dark" name="collectionId" required>
+                    <option value="" disabled selected>Choose a collection...</option>
+                    <option th:each="col : ${collections}"
+                            th:value="${col.id}"
+                            th:text="${col.name}">
+                        Favorites
+                    </option>
                 </select>
+
                 <button type="submit" class="btn-save">Save</button>
             </form>
         </div>
-    </div>
 
     <div class="main-content">
         <h1 th:text="${isLocal ? book.title : externalBook.title}">Book Title</h1>

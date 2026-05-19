@@ -1,0 +1,168 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f6f9; /* Мягкий светлый фон, как на основном сайте */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-container {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 420px;
+    box-sizing: border-box;
+}
+
+/* Заголовки формы */
+.auth-container h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 26px;
+    color: #2c3e50;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Стилизация самих форм */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Метки полей (Labels) */
+.auth-form label {
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Поля ввода (Inputs) */
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Фокус на полях ввода */
+.auth-form input:focus {
+    border-color: #3498db; /* Красивый синий акцент */
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    outline: none;
+}
+
+/* Блок для ввода email с кнопкой отправки кода (Регистрация) */
+.email-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+}
+
+.email-group input {
+    margin-bottom: 0 !important; /* Убираем нижний отступ, так как кнопка в одну строку */
+    flex: 1;
+}
+
+/* Главные кнопки (Войти / Создать аккаунт) */
+.btn-auth {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-align: center;
+}
+
+.btn-auth:hover {
+    background-color: #2980b9;
+}
+
+.btn-auth:active {
+    transform: scale(0.98);
+}
+
+/* Специальная кнопка отправки кода (более компактная) */
+.btn-send-code {
+    background-color: #2ecc71; /* Зеленая кнопка отправки */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    height: 46px; /* Выравниваем по высоте инпута */
+    box-sizing: border-box;
+}
+
+.btn-send-code:hover {
+    background-color: #27ae60;
+}
+
+/* Сообщения об ошибках и успехе */
+.error-msg {
+    background-color: #fde8e8;
+    color: #e74c3c;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-left: 4px solid #e74c3c;
+}
+
+.success-msg {
+    background-color: #edf7ed;
+    color: #27ae60;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-left: 4px solid #27ae60;
+}
+
+/* Разделительная линия */
+.hr-divider {
+    border: 0;
+    height: 1px;
+    background: #eee;
+    margin: 24px 0;
+}
+
+.auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.auth-footer a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
