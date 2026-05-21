@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BookRepository extends JpaRepository<Book, Long> {
+public interface BookRepository extends JpaRepository<Book, String> {
 
     @Query("SELECT b FROM Book b " +
             "LEFT JOIN b.authors a " +

@@ -1,11 +1,13 @@
 package org.example.booknest_2.dto;
 
+import lombok.Getter;
 import org.example.booknest_2.model.Collection; // Убедись, что импорт правильный
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public class CollectionDTO {
-    private int id;
+    private Long id;
     private String name;
     private int totalBooks;
     private List<String> bookTitles;
@@ -13,7 +15,7 @@ public class CollectionDTO {
     public CollectionDTO() {}
 
     public CollectionDTO(Collection entity) {
-        this.id = entity.getId();
+        this.id = (long) entity.getId();
         this.name = entity.getName();
 
         if (entity.getBooks() != null) {
@@ -24,10 +26,22 @@ public class CollectionDTO {
         }
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public CollectionDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-    public String getName() { return name; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
     public void setName(String name) { this.name = name; }
 
     public int getTotalBooks() { return totalBooks; }

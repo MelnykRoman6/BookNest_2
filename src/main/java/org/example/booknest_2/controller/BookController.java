@@ -33,16 +33,18 @@ public class BookController {
     private BookRepository bookRepository;
     @Autowired
     private CollectionService collectionService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/add-book")
-    public String addBookToCollection(@RequestParam Long bookId,
+    public String addBookToCollection(@RequestParam String bookId,
                                       @RequestParam Long collectionId,
                                       RedirectAttributes redirectAttributes) {
         try {
             collectionService.addBookToCollection(bookId, collectionId);
-            redirectAttributes.addFlashAttribute("successMessage", "Book successfully added!");
+            redirectAttributes.addFlashAttribute("success", "Book successfully added!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error while adding: " + e.getMessage());
         }
 
         return "redirect:/book/" + bookId;
@@ -77,42 +79,50 @@ public class BookController {
                                   @RequestParam(value = "authorName", required = false) String authorName,
                                   Model model, @AuthenticationPrincipal UserDetails currentUser) {
 
-        // 1. Ищем в базе: либо по нашему ID (Long), либо по OpenLibrary ID (String)
+        // 1. Ищем в базе: либо по OpenLibrary ID, либо по внутреннему ID
         Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
         System.out.println("DEBUG: Clicked on ID: " + id);
         System.out.println("DEBUG: Received Author Name: " + authorName);
-        // Если по OL ID не нашли, попробуем по обычному Long ID (на случай, если это старая книга)
+
         if (localBook.isEmpty()) {
             try {
-                localBook = bookRepository.findById(Long.parseLong(id));
+                localBook = bookRepository.findById(id);
             } catch (NumberFormatException ignored) {}
         }
 
-        // 2. Если книга нашлась в базе — просто отдаем её
+        Book bookToShow;
+
         if (localBook.isPresent()) {
-            model.addAttribute("book", localBook.get());
+            bookToShow = localBook.get();
             model.addAttribute("isLocal", true);
-            model.addAttribute("iaId", ia);
-            return "book-details";
-        }
-        System.out.println("CONTROLLER RECEIVED: " + authorName);
-        Book savedBook = bookService.saveExternalBook(id, authorName);
-
-        if (savedBook != null) {
-            model.addAttribute("book", savedBook);
-            model.addAttribute("isLocal", true); // Теперь она локальная!
         } else {
-            // Если API не ответило, можно показать страницу ошибки или заглушку
-            return "error/404";
+            System.out.println("CONTROLLER RECEIVED EXTERNAL: " + authorName);
+            bookToShow = bookService.saveExternalBook(id, authorName);
+            if (bookToShow != null) {
+                model.addAttribute("isLocal", true);
+            } else {
+                return "error/404";
+            }
         }
 
-        if (currentUser != null) {
-            // Ищем коллекции юзера по его email
-            List<CollectionDTO> userCollections = UserService.getCollectionsByEmail(currentUser.getUsername());
-            model.addAttribute("collections", userCollections);
-        }
-
+        // Передаем книгу в модель один раз для обоих случаев
+        model.addAttribute("book", bookToShow);
         model.addAttribute("iaId", ia);
+
+        // 2. ВЫПОЛНЯЕТСЯ ВСЕГДА: Ищем коллекции, если пользователь залогинен
+        if (currentUser != null) {
+            String email = currentUser.getUsername();
+            System.out.println("Залогинен юзер: " + email);
+
+            // Вызываем у экземпляра сервиса (не забудь заинжектить userService через @Autowired вверху класса)
+            List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
+            System.out.println("Найдено коллекций: " + (userCollections != null ? userCollections.size() : "null"));
+
+            model.addAttribute("collections", userCollections);
+        } else {
+            System.out.println("Пользователь не залогинен");
+        }
+
         return "book-details";
     }
 }

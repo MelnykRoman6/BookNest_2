@@ -43,11 +43,8 @@
                     <option value="" disabled selected>Choose a collection...</option>
                     <option th:each="col : ${collections}"
                             th:value="${col.id}"
-                            th:text="${col.name}">
-                        Favorites
-                    </option>
+                            th:text="${col.name}">Reading</option>
                 </select>
-
                 <button type="submit" class="btn-save">Save</button>
             </form>
         </div>

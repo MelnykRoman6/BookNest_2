@@ -16,7 +16,7 @@ public class CollectionService {
     @Autowired private BookRepository bookRepository; // Твой репозиторий книг
 
     @Transactional
-    public void addBookToCollection(Long bookId, Long collectionId) {
+    public void addBookToCollection(String bookId, Long collectionId) {
         Collection collection = collectionRepository.findById(collectionId)
                 .orElseThrow(() -> new RuntimeException("Collection not found"));
 
