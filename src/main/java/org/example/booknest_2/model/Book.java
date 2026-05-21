@@ -3,6 +3,9 @@ package org.example.booknest_2.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -13,7 +16,7 @@ public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false)
     private String title;
@@ -50,6 +53,9 @@ public class Book {
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private Set<Review> reviews;
+
+    @ManyToMany(mappedBy = "books")
+    private List<Collection> collections = new ArrayList<>();
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private Set<Format> formats;

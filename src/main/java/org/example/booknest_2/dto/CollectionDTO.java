@@ -10,6 +10,7 @@ public class CollectionDTO {
     private Long id;
     private String name;
     private int totalBooks;
+    private List<String> bookIds;
     private List<String> bookTitles;
 
     public CollectionDTO() {}
@@ -22,6 +23,9 @@ public class CollectionDTO {
             this.totalBooks = entity.getBooks().size();
             this.bookTitles = entity.getBooks().stream()
                     .map(book -> book.getTitle())
+                    .collect(Collectors.toList());
+            this.bookIds = entity.getBooks().stream()
+                    .map(book -> String.valueOf(book.getId()))
                     .collect(Collectors.toList());
         }
     }

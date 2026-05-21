@@ -3,6 +3,9 @@ package org.example.booknest_2.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,5 +31,5 @@ public class Collection {
             joinColumns = @JoinColumn(name = "collection_id"),
             inverseJoinColumns = @JoinColumn(name = "book_id")
     )
-    private Set<Book> books;
+    private List<Book> books = new ArrayList<>();
 }

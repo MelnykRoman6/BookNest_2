@@ -1,25 +1,51 @@
-<div class="container">
-    <div class="section">
-        <h2>My profile</h2>
-        <div class="info-box">
-            <p><strong>Email:</strong> <span th:text="${user.email}">user@example.com</span></p>
-            <p><strong>Member from:</strong> <span th:text="${#temporals.format(user.dateReg, 'dd/MM/yyyy')}">01/01/2026</span></p>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - BookNest</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<div class="profile-layout">
+    <aside class="profile-sidebar">
+        <div class="avatar-placeholder">
+            <span th:text="${#strings.substring(user.email, 0, 1).toUpperCase()}">U</span>
         </div>
-    </div>
+        <h2 th:text="${user.email}">user@email.com</h2>
+        <p class="reg-date">
+            Member since: <span th:text="${#temporals.format(user.dateReg, 'dd MMMM yyyy')}">12.12.2025</span>
+        </p>
+        <hr>
+        <a th:href="@{/}" class="btn-back">← Back to Catalog</a>
+    </aside>
 
-    <div class="section">
-        <h3>My collections</h3>
-        <div th:each="col : ${user.collections}" class="list-col">
-            <div class="list-item collapsible-header" th:onclick="'toggleCollection(' + ${col.id} + ')'">
-                <strong th:text="${col.name}">Collection Name</strong>
-                <span class="badge-count" th:text="${col.totalBooks} + ' books'">5 books</span>
-            </div>
+    <main class="profile-content">
+        <h1>My Collections</h1>
 
-            <div th:id="'col-' + ${col.id}" class="books-content" style="display:none;">
-                <div th:each="book : ${col.books}" class="book-item">
-                    <a th:href="@{/book/{id}(id=${book.openLibraryId})}" th:text="${book.title}">Book Title</a>
+        <div class="collections-grid">
+            <div class="collection-card" th:each="col : ${collections}">
+                <div class="collection-header">
+                    <h3 th:text="${col.name}">Reading</h3>
+                    <span class="badge" th:text="${col.totalBooks} + ' books'">0 books</span>
                 </div>
+
+                <div style="background: #333; padding: 10px; margin-bottom: 10px; font-family: monospace; font-size: 12px; color: #ffcc00;">
+                    DEBUG: size of titles = <span th:text="${col.bookTitles != null ? col.bookTitles.size() : 'NULL'}"></span> <br/>
+                    DEBUG: size of ids = <span th:text="${col.bookIds != null ? col.bookIds.size() : 'NULL'}"></span>
+                </div>
+
+                <ul class="books-list">
+                    <li th:each="title : ${col.bookTitles}" th:text="${title}">Книга</li>
+
+                    <li class="empty-list" th:if="${col.bookTitles == null or col.bookTitles.empty}">
+                        No books in this collection yet.
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
+    </main>
 </div>
+
+</body>
+</html>

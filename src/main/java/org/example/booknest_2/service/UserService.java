@@ -22,6 +22,18 @@ public class UserService {
         System.out.println("--- ДЕБАГ СЕРВИСА ---");
         System.out.println("Ищем коллекции для email: " + email);
         List<Collection> collections = collectionRepository.findByUsersEmail(email);
+        for (Collection col : collections) {
+            System.out.println("Коллекция: " + col.getName());
+            if (col.getBooks() == null) {
+                System.out.println(" -> Список книг NULL!");
+            } else {
+                System.out.println(" -> Размер списка книг в Entity: " + col.getBooks().size());
+                col.getBooks().forEach(b ->
+                        System.out.println("   -> Книга в Entity: ID=" + b.getId() + ", Title=" + b.getTitle())
+                );
+            }
+        }
+        System.out.println("=============================");
         System.out.println("Количество сырых сущностей из базы: " + collections.size());
         for (Collection c : collections) {
             System.out.println("Сущность из БД -> ID: " + c.getId() + ", Name: " + c.getName());
