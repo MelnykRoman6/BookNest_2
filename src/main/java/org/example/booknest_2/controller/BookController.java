@@ -42,16 +42,13 @@ public class BookController {
                         @RequestParam(required = false) Long genre,
                         Model model) {
 
-        // Передаем списки для выпадающих меню (Author/Genre)
         model.addAttribute("authors", authorRepository.findAll());
         model.addAttribute("genres", genreRepository.findAll());
 
-        // Получаем книги из БД
         if (search != null || author != null || genre != null) {
             List<Book> localBooks = bookService.searchLocalBooks(search, author, genre, null);
             model.addAttribute("localBooks", localBooks);
 
-            // Если ищем по названию, тянем из API
             if (search != null && !search.isEmpty()) {
                 model.addAttribute("externalBooks", bookService.searchExternalBooks(search));
             }
@@ -65,42 +62,22 @@ public class BookController {
                                   @RequestParam(value = "authorName", required = false) String authorName,
                                   Model model, @AuthenticationPrincipal UserDetails currentUser) {
 
-        // 1. Ищем в базе: либо по OpenLibrary ID, либо по внутреннему ID
-        Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
-        System.out.println("DEBUG: Clicked on ID: " + id);
-        System.out.println("DEBUG: Received Author Name: " + authorName);
+        Book bookToShow = bookService.getOrSaveBookDetails(id, authorName);
 
-        if (localBook.isEmpty()) {
-            try {
-                localBook = bookRepository.findByOpenLibraryId(id);
-            } catch (NumberFormatException ignored) {}
+        if (bookToShow == null) {
+            return "error/404";
         }
 
-        Book bookToShow;
-
-        if (localBook.isPresent()) {
-            bookToShow = localBook.get();
-            model.addAttribute("isLocal", true);
-        } else {
-            System.out.println("CONTROLLER RECEIVED EXTERNAL: " + authorName);
-            bookToShow = bookService.saveExternalBook(id, authorName);
-            if (bookToShow != null) {
-                model.addAttribute("isLocal", true);
-            } else {
-                return "error/404";
-            }
-        }
-
-        // Передаем книгу в модель один раз для обоих случаев
+        // Если дошли сюда — книга железно есть (либо из БД, либо только что создана)
         model.addAttribute("book", bookToShow);
+        model.addAttribute("isLocal", true);
         model.addAttribute("iaId", ia);
 
-        // 2. ВЫПОЛНЯЕТСЯ ВСЕГДА: Ищем коллекции, если пользователь залогинен
+        // 2. Логика коллекций юзера (работает через userService)
         if (currentUser != null) {
             String email = currentUser.getUsername();
             System.out.println("Залогинен юзер: " + email);
 
-            // Вызываем у экземпляра сервиса (не забудь заинжектить userService через @Autowired вверху класса)
             List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
             System.out.println("Найдено коллекций: " + (userCollections != null ? userCollections.size() : "null"));
 

@@ -116,6 +116,26 @@ public class BookService {
         }
     }
 
+    public Book getOrSaveBookDetails(String id, String authorName) {
+        Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
+        System.out.println("DEBUG: Service searching ID: " + id);
+        System.out.println("DEBUG: Service received Author Name: " + authorName);
+
+        // Твой блок с проверкой (хотя он дублировал поиск, мы сохраняем твою логику подстраховки)
+        if (localBook.isEmpty()) {
+            try {
+                localBook = bookRepository.findByOpenLibraryId(id);
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (localBook.isPresent()) {
+            return localBook.get();
+        } else {
+            System.out.println("SERVICE: Book not found locally. Saving external book from OL...");
+            return saveExternalBook(id, authorName);
+        }
+    }
+
     @Transactional
     public Book saveExternalBook(String openLibraryId, String passedAuthorName) {
         // 1. Проверка на дубликат (чтобы не сохранять одну и ту же книгу дважды)
