@@ -36,20 +36,6 @@ public class BookController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/add-book")
-    public String addBookToCollection(@RequestParam String bookId,
-                                      @RequestParam Long collectionId,
-                                      RedirectAttributes redirectAttributes) {
-        try {
-            collectionService.addBookToCollection(bookId, collectionId);
-            redirectAttributes.addFlashAttribute("success", "Book successfully added!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error while adding: " + e.getMessage());
-        }
-
-        return "redirect:/book/" + bookId;
-    }
-
     @GetMapping("/")
     public String index(@RequestParam(required = false) String search,
                         @RequestParam(required = false) Long author,
@@ -86,7 +72,7 @@ public class BookController {
 
         if (localBook.isEmpty()) {
             try {
-                localBook = bookRepository.findById(id);
+                localBook = bookRepository.findByOpenLibraryId(id);
             } catch (NumberFormatException ignored) {}
         }
 

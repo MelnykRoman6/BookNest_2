@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "collection")
@@ -27,7 +26,7 @@ public class Collection {
 
     @ManyToMany
     @JoinTable(
-            name = "add",
+            name = "user_books",
             joinColumns = @JoinColumn(name = "collection_id"),
             inverseJoinColumns = @JoinColumn(name = "book_id")
     )

@@ -37,7 +37,7 @@ public class Book {
 
     @ManyToMany
     @JoinTable(
-            name = "belong",
+            name = "book_genre",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
@@ -45,7 +45,7 @@ public class Book {
 
     @ManyToMany
     @JoinTable(
-            name = "`write`",
+            name = "`author_books`",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id")
     )

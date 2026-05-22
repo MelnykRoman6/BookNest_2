@@ -14,16 +14,22 @@ public class CollectionController {
     private CollectionService collectionService;
 
     @PostMapping("/collection/add-book")
-    public String addBookToCollection(@RequestParam("bookId") String bookId,
-                                      @RequestParam("collectionId") Long collectionId,
+    public String addBookToCollection(@RequestParam String bookId,
+                                      @RequestParam Long collectionId,
+                                      @RequestParam String olId,
                                       RedirectAttributes redirectAttributes) {
+        System.out.println("--- ADD BOOK TO COLLECTION ---");
+        System.out.println("Received bookId: " + bookId);
+        System.out.println("Received collectionId: " + collectionId);
+        System.out.println("Received olId from form: " + olId);
         try {
             collectionService.addBookToCollection(bookId, collectionId);
-            redirectAttributes.addFlashAttribute("success", "Book added to collection!");
+            redirectAttributes.addFlashAttribute("success", "Book successfully added!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
+            System.out.println("Error inside controller: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error while adding: " + e.getMessage());
         }
 
-        return "redirect:/book/" + bookId;
+        return "redirect:/book/" + olId;
     }
 }

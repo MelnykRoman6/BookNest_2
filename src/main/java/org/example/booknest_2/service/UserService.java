@@ -40,7 +40,7 @@ public class UserService {
         }
 
         List<CollectionDTO> dtos = collections.stream()
-                .map(col -> new CollectionDTO((long) col.getId(), col.getName()))
+                .map(col -> new CollectionDTO(col))
                 .collect(Collectors.toList());
 
         System.out.println("Количество DTO после маппинга: " + dtos.size());

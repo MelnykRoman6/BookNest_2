@@ -131,3 +131,39 @@ body {
     color: #666;
     font-style: italic;
 }
+
+.clickable-trigger {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.arrow-icon {
+    font-size: 11px;
+    color: #666; /* Спокойный серый цвет, как в IDE */
+    transition: transform 0.2s ease, color 0.2s ease;
+    display: inline-block;
+}
+
+.hidden-list {
+    display: none;
+    margin-top: 15px;
+    padding-left: 23px;
+}
+
+.clickable-trigger:hover .arrow-icon {
+    color: #3498db;
+}
+
+.clickable-trigger.active .arrow-icon {
+    transform: rotate(90deg);
+    color: #3498db;
+}

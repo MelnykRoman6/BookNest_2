@@ -17,11 +17,7 @@
 
 <div class="details-wrapper">
     <div class="side-panel">
-        <img th:if="${isLocal}" th:src="${book.coverUrl}" class="book-cover" alt="Cover">
-
-        <img th:if="${!isLocal}"
-             th:src="${externalBook['cover_id'] != null ? 'https://covers.openlibrary.org/b/id/' + externalBook['cover_id'] + '-L.jpg' : 'https://via.placeholder.com/300x450?text=No+Cover'}"
-             class="book-cover" alt="Cover">
+        <img th:src="${book.coverUrl}" class="book-cover" alt="Cover">
 
         <div class="action-btns">
             <a th:if="${iaId != null}"
@@ -45,6 +41,7 @@
                             th:value="${col.id}"
                             th:text="${col.name}">Reading</option>
                 </select>
+                <input type="hidden" name="olId" th:value="${book.openLibraryId}" />
                 <button type="submit" class="btn-save">Save</button>
             </form>
         </div>

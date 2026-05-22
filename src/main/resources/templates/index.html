@@ -57,11 +57,11 @@
     <h3 th:if="${localBooks != null}">Books from our Library</h3>
     <div class="books-grid">
         <div th:each="book : ${localBooks}" class="book-card">
-            <a th:href="@{/book/{id}(id=${book.id})}">
+            <a th:href="@{/book/{id}(id=${book.openLibraryId})}">
                 <img th:src="${book.coverUrl}" class="book-cover" alt="cover">
             </a>
             <div class="book-details">
-                <a th:href="@{/book/{id}(id=${book.id})}" class="book-title">
+                <a th:href="@{/book/{id}(id=${book.openLibraryId})}" class="book-title">
                     <strong th:text="${book.title}">Title</strong>
                 </a>
                 <span class="book-author">Author:

@@ -25,18 +25,21 @@
 
         <div class="collections-grid">
             <div class="collection-card" th:each="col : ${collections}">
-                <div class="collection-header">
-                    <h3 th:text="${col.name}">Reading</h3>
+
+                <div class="collection-header clickable-trigger" onclick="toggleCollection(this)">
+                    <div class="title-wrapper">
+                        <span class="arrow-icon">▶</span>
+                        <h3 th:text="${col.name}" style="margin: 0; display: inline-block;">Reading</h3>
+                    </div>
                     <span class="badge" th:text="${col.totalBooks} + ' books'">0 books</span>
                 </div>
 
-                <div style="background: #333; padding: 10px; margin-bottom: 10px; font-family: monospace; font-size: 12px; color: #ffcc00;">
-                    DEBUG: size of titles = <span th:text="${col.bookTitles != null ? col.bookTitles.size() : 'NULL'}"></span> <br/>
-                    DEBUG: size of ids = <span th:text="${col.bookIds != null ? col.bookIds.size() : 'NULL'}"></span>
-                </div>
-
-                <ul class="books-list">
-                    <li th:each="title : ${col.bookTitles}" th:text="${title}">Книга</li>
+                <ul class="books-list hidden-list">
+                    <li th:each="title, iter : ${col.bookTitles}">
+                        <a th:href="@{/book/{id}(id=${col.bookIds[iter.index]})}" th:text="${title}">
+                            Book Title
+                        </a>
+                    </li>
 
                     <li class="empty-list" th:if="${col.bookTitles == null or col.bookTitles.empty}">
                         No books in this collection yet.
@@ -48,4 +51,20 @@
 </div>
 
 </body>
+<script>
+    function toggleCollection(headerElement) {
+        // Переключаем класс active у шапки (для поворота стрелочки в CSS)
+        headerElement.classList.toggle('active');
+
+        // Находим список <ul>, который идет сразу после этой шапки
+        const booksList = headerElement.nextElementSibling;
+
+        // Переключаем отображение (toggle между display: none и display: block)
+        if (booksList.style.display === "block") {
+            booksList.style.display = "none";
+        } else {
+            booksList.style.display = "block";
+        }
+    }
+</script>
 </html>
