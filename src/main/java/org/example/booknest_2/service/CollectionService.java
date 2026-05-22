@@ -13,7 +13,8 @@ public class CollectionService {
 
     @Autowired
     private CollectionRepository collectionRepository;
-    @Autowired private BookRepository bookRepository; // Твой репозиторий книг
+    @Autowired
+    private BookRepository bookRepository;
 
     @Transactional
     public void addBookToCollection(String bookId, Long collectionId) {
@@ -23,10 +24,9 @@ public class CollectionService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
 
-        // Добавляем книгу в список книг этой коллекции
         if (!collection.getBooks().contains(book)) {
             collection.getBooks().add(book);
-            collectionRepository.save(collection); // Hibernate сам сделает инсерт в таблицу aggiungere
+            collectionRepository.save(collection);
         }
     }
 }

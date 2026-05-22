@@ -36,8 +36,8 @@ public class BookService {
     }
 
     private void saveSearchHistory(Users user, String query) {
-        // Проверяем, не искал ли юзер это же самое в последние 24 часа
-        // (Аналог твоей проверки CURDATE() в PHP)
+
+        //verif to not duplicate history searches if they're in the same day
         LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
         var existing = searchHistoryRepository.findByUserAndSearchCriteriaAndSearchDateAfter(user, query, oneDayAgo);
 
@@ -51,32 +51,29 @@ public class BookService {
     }
 
     public List<ExternalBookDTO> searchExternalBooks(String query) {
-        // Формируем URL для OpenLibrary (как в твоем PHP)
+        //forming openlibraryid
         String url = "https://openlibrary.org/search.json?q=" + query.replace(" ", "+");
 
         try {
-            // Делаем запрос. Map.class говорит Spring, что мы ждем JSON, который нужно превратить в карту
+            //api request
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
             List<Map<String, Object>> docs = (List<Map<String, Object>>) response.get("docs");
 
             List<ExternalBookDTO> results = new ArrayList<>();
             if (docs != null) {
-                // Берем первые 10 результатов, чтобы не перегружать страницу
+                //first 10 results
                 for (int i = 0; i < Math.min(docs.size(), 12); i++) {
                     Map<String, Object> doc = docs.get(i);
                     ExternalBookDTO dto = new ExternalBookDTO();
-
-                    // Вытаскиваем данные из JSON (аналог $book['title'] и т.д.)
                     dto.setTitle((String) doc.get("title"));
-
                     List<String> authors = (List<String>) doc.get("author_name");
                     dto.setAuthorName(authors != null && !authors.isEmpty() ? authors.get(0) : "Unknown");
 
-                    // OpenLibrary ID (нужен для ссылки на страницу книги)
+                    // OpenLibrary ID
                     String key = (String) doc.get("key");
                     dto.setOpenLibraryId(key != null ? key.replace("/works/", "") : "");
 
-                    // ID обложки
+                    // cover ID
                     Object coverI = doc.get("cover_i");
                     dto.setCoverId(coverI != null ? coverI.toString() : null);
 
@@ -93,7 +90,6 @@ public class BookService {
         try {
             Map<String, Object> details = restTemplate.getForObject(url, Map.class);
             if (details != null) {
-                // Обработка описания (уже была)
                 if (details.containsKey("description")) {
                     Object desc = details.get("description");
                     if (desc instanceof Map) {
@@ -101,11 +97,9 @@ public class BookService {
                     }
                 }
 
-                // НОВОЕ: Обработка обложки
                 if (details.containsKey("covers")) {
                     List<Object> covers = (List<Object>) details.get("covers");
                     if (covers != null && !covers.isEmpty()) {
-                        // Берем первый ID из массива и сохраняем как cover_id
                         details.put("cover_id", covers.get(0).toString());
                     }
                 }
@@ -118,10 +112,9 @@ public class BookService {
 
     public Book getOrSaveBookDetails(String id, String authorName) {
         Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
-        System.out.println("DEBUG: Service searching ID: " + id);
-        System.out.println("DEBUG: Service received Author Name: " + authorName);
+        System.out.println("bookService DEBUG: Service searching ID: " + id);
+        System.out.println("bookService DEBUG: Service received Author Name: " + authorName);
 
-        // Твой блок с проверкой (хотя он дублировал поиск, мы сохраняем твою логику подстраховки)
         if (localBook.isEmpty()) {
             try {
                 localBook = bookRepository.findByOpenLibraryId(id);
@@ -131,22 +124,20 @@ public class BookService {
         if (localBook.isPresent()) {
             return localBook.get();
         } else {
-            System.out.println("SERVICE: Book not found locally. Saving external book from OL...");
+            System.out.println("bookService debug: Book not found locally. Saving external book from OL...");
             return saveExternalBook(id, authorName);
         }
     }
 
     @Transactional
     public Book saveExternalBook(String openLibraryId, String passedAuthorName) {
-        // 1. Проверка на дубликат (чтобы не сохранять одну и ту же книгу дважды)
+        //duplicate verif
         Optional<Book> existing = bookRepository.findByOpenLibraryId(openLibraryId);
         if (existing.isPresent()) return existing.get();
 
-        // 2. Получаем полные данные из API
         Map<String, Object> details = getExternalBookDetails(openLibraryId);
         if (details == null) return null;
 
-        // 3. Создаем объект Книги и заполняем поля
         Book newBook = new Book();
         newBook.setOpenLibraryId(openLibraryId);
         newBook.setTitle((String) details.get("title"));
@@ -156,23 +147,19 @@ public class BookService {
             if (rawDescription instanceof String) {
                 newBook.setDescription((String) rawDescription);
             } else if (rawDescription instanceof Map) {
-                // Если описание пришло как {"value": "текст..."}, достаем value
                 Map<?, ?> descMap = (Map<?, ?>) rawDescription;
                 newBook.setDescription((String) descMap.get("value"));
             }
         }
 
-        // Сохраняем ID обложки
         if (details.containsKey("cover_id")) {
             newBook.setCoverId(details.get("cover_id").toString());
         }
 
-        // 4. ЛОГИКА АВТОРОВ (Связи Many-to-Many)
         if (details.containsKey("authors")) {
             List<Map<String, Object>> authorsList = (List<Map<String, Object>>) details.get("authors");
             Set<Author> authorsSet = new HashSet<>();
 
-            // В цикле перебора авторов:
             for (Map<String, Object> authData : authorsList) {
                 Map<String, Object> authRef = (Map<String, Object>) authData.get("author");
                 if (authRef != null) {

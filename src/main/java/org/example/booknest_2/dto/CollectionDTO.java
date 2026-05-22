@@ -1,19 +1,21 @@
 package org.example.booknest_2.dto;
 
 import lombok.Getter;
-import org.example.booknest_2.model.Collection; // Убедись, что импорт правильный
+import lombok.Setter;
+import org.example.booknest_2.model.Book;
+import org.example.booknest_2.model.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 public class CollectionDTO {
+    @Setter
     private Long id;
+    @Setter
     private String name;
     private int totalBooks;
     private List<String> bookIds;
     private List<String> bookTitles;
-
-    public CollectionDTO() {}
 
     public CollectionDTO(Collection entity) {
         this.id = (long) entity.getId();
@@ -22,35 +24,11 @@ public class CollectionDTO {
         if (entity.getBooks() != null) {
             this.totalBooks = entity.getBooks().size();
             this.bookTitles = entity.getBooks().stream()
-                    .map(book -> book.getTitle())
+                    .map(Book::getTitle)
                     .collect(Collectors.toList());
             this.bookIds = entity.getBooks().stream()
                     .map(book -> String.valueOf(book.getId()))
                     .collect(Collectors.toList());
         }
     }
-
-    public CollectionDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) { this.name = name; }
-
-    public int getTotalBooks() { return totalBooks; }
-    public void setTotalBooks(int totalBooks) { this.totalBooks = totalBooks; }
-
-    public List<String> getBookTitles() { return bookTitles; }
-    public void setBookTitles(List<String> bookTitles) { this.bookTitles = bookTitles; }
 }

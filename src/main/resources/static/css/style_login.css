@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f6f9; /* Мягкий светлый фон, как на основном сайте */
+    background-color: #f4f6f9;
     color: #333;
     display: flex;
     justify-content: center;
@@ -20,7 +20,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Заголовки формы */
 .auth-container h2 {
     margin-top: 0;
     margin-bottom: 24px;
@@ -30,13 +29,11 @@ body {
     font-weight: 600;
 }
 
-/* Стилизация самих форм */
 .auth-form {
     display: flex;
     flex-direction: column;
 }
 
-/* Метки полей (Labels) */
 .auth-form label {
     font-size: 14px;
     margin-bottom: 6px;
@@ -44,7 +41,6 @@ body {
     font-weight: 500;
 }
 
-/* Поля ввода (Inputs) */
 .auth-form input[type="email"],
 .auth-form input[type="password"],
 .auth-form input[type="text"] {
@@ -59,15 +55,13 @@ body {
     width: 100%;
 }
 
-/* Фокус на полях ввода */
 .auth-form input:focus {
-    border-color: #3498db; /* Красивый синий акцент */
+    border-color: #3498db;
     background-color: #ffffff;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
     outline: none;
 }
 
-/* Блок для ввода email с кнопкой отправки кода (Регистрация) */
 .email-group {
     display: flex;
     gap: 10px;
@@ -76,11 +70,10 @@ body {
 }
 
 .email-group input {
-    margin-bottom: 0 !important; /* Убираем нижний отступ, так как кнопка в одну строку */
+    margin-bottom: 0 !important;
     flex: 1;
 }
 
-/* Главные кнопки (Войти / Создать аккаунт) */
 .btn-auth {
     background-color: #3498db;
     color: white;
@@ -102,9 +95,8 @@ body {
     transform: scale(0.98);
 }
 
-/* Специальная кнопка отправки кода (более компактная) */
 .btn-send-code {
-    background-color: #2ecc71; /* Зеленая кнопка отправки */
+    background-color: #2ecc71;
     color: white;
     border: none;
     padding: 12px 20px;
@@ -113,7 +105,7 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    height: 46px; /* Выравниваем по высоте инпута */
+    height: 46px;
     box-sizing: border-box;
 }
 
@@ -121,7 +113,6 @@ body {
     background-color: #27ae60;
 }
 
-/* Сообщения об ошибках и успехе */
 .error-msg {
     background-color: #fde8e8;
     color: #e74c3c;
@@ -142,7 +133,6 @@ body {
     border-left: 4px solid #27ae60;
 }
 
-/* Разделительная линия */
 .hr-divider {
     border: 0;
     height: 1px;

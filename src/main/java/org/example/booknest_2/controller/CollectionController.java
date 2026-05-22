@@ -1,3 +1,5 @@
+//controller for all operations with collections
+
 package org.example.booknest_2.controller;
 
 import org.example.booknest_2.service.CollectionService;
@@ -18,15 +20,14 @@ public class CollectionController {
                                       @RequestParam Long collectionId,
                                       @RequestParam String olId,
                                       RedirectAttributes redirectAttributes) {
-        System.out.println("--- ADD BOOK TO COLLECTION ---");
-        System.out.println("Received bookId: " + bookId);
-        System.out.println("Received collectionId: " + collectionId);
-        System.out.println("Received olId from form: " + olId);
+        System.out.println("CollContr debug: Received bookId: " + bookId);
+        System.out.println("CollContr debug: Received collectionId: " + collectionId);
+        System.out.println("CollContr debug: Received olId from form: " + olId);
         try {
             collectionService.addBookToCollection(bookId, collectionId);
             redirectAttributes.addFlashAttribute("success", "Book successfully added!");
         } catch (Exception e) {
-            System.out.println("Error inside controller: " + e.getMessage());
+            System.out.println("CollContr debug: Error inside controller: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Error while adding: " + e.getMessage());
         }
 

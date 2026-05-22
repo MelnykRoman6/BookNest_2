@@ -21,6 +21,5 @@ public interface BookRepository extends JpaRepository<Book, String> {
     List<Book> searchBooks(@Param("title") String title,
                            @Param("authorId") Long authorId,
                            @Param("genreId") Long genreId);
-    List<Book> findByTitleContainingIgnoreCase(String title);
     Optional<Book> findByOpenLibraryId(String openLibraryId);
 }

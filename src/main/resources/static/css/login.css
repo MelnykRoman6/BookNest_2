@@ -58,7 +58,7 @@ body {
     border: 1px solid #444;
     border-radius: 6px;
     color: white;
-    box-sizing: border-box; /* Чтобы padding не раздувал ширину */
+    box-sizing: border-box;
     outline: none;
 }
 .hr {

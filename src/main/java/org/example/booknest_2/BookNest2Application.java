@@ -16,6 +16,7 @@ public class BookNest2Application {
     @Bean
     CommandLineRunner testDb(BookRepository bookRepository) {
         return args -> {
+            System.out.println( "BookNest2Application initial testDb");
             System.out.println("--- CHECKING DATABASE ---");
             long count = bookRepository.count();
             System.out.println("Total books in database: " + count);

@@ -53,13 +53,10 @@
 </body>
 <script>
     function toggleCollection(headerElement) {
-        // Переключаем класс active у шапки (для поворота стрелочки в CSS)
-        headerElement.classList.toggle('active');
 
-        // Находим список <ul>, который идет сразу после этой шапки
+        headerElement.classList.toggle('active');
         const booksList = headerElement.nextElementSibling;
 
-        // Переключаем отображение (toggle между display: none и display: block)
         if (booksList.style.display === "block") {
             booksList.style.display = "none";
         } else {

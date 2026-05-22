@@ -1,3 +1,5 @@
+//registration and login controller
+
 package org.example.booknest_2.controller;
 
 import jakarta.servlet.http.HttpSession;
@@ -22,7 +24,7 @@ public class AuthController {
 
     @PostMapping("/register/send-code")
     public String sendCode(@RequestParam String email, HttpSession session, Model model) {
-        System.out.println("Контроллер получил email: " + email);
+        System.out.println("authContr debug: received mail: " + email);
         try {
             authService.sendVerificationCode(email, session);
             model.addAttribute("msg", "Code sent to " + email);

@@ -9,5 +9,4 @@ import java.util.Optional;
 @Repository
 public interface AuthorRepository extends JpaRepository<Author, Long> {
     Optional<Author> findByOpenLibraryAuthorId(String openLibraryAuthorId);
-    // Здесь пока не нужно писать методы, findAll() уже есть внутри JpaRepository
 }

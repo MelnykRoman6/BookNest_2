@@ -1,7 +1,8 @@
+//controller for all operations with users
+
 package org.example.booknest_2.controller;
 
 import org.example.booknest_2.dto.CollectionDTO;
-import org.example.booknest_2.dto.ProfileDTO;
 import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.UsersRepository;
 import org.example.booknest_2.service.UserService;
@@ -18,7 +19,6 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-
     @Autowired
     private UsersRepository usersRepository;
 

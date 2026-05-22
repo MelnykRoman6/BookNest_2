@@ -1,6 +1,5 @@
 package org.example.booknest_2.service;
 
-
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.example.booknest_2.model.Users;
@@ -27,6 +26,7 @@ public class AuthService {
     @Autowired
     private JavaMailSender mailSender;
 
+    //sends the verif code to the user
     public void sendVerificationCode(String email, HttpSession session) {
         String code = String.valueOf(new Random().nextInt(899999) + 100000);
         session.setAttribute("temp_code", code);
@@ -51,11 +51,14 @@ public class AuthService {
         if (email != null) {
             newUser.setEmail(email);
         }
+
+        //creates user after verif
         newUser.setVerified(true);
         newUser.setPasswordHash(passwordEncoder.encode(password));
         newUser.setDateReg(LocalDateTime.now());
         newUser = userRepository.save(newUser);
 
+        //right after user creation creates also basic collections
         List<String> baseCollections = List.of("Reading", "Finished", "I want to read", "Favorites");
         for (String name : baseCollections) {
             Collection col = new Collection();

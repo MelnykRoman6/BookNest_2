@@ -19,32 +19,30 @@ public class UserService {
     private CollectionRepository collectionRepository;
 
     public List<CollectionDTO> getCollectionsByEmail(String email) {
-        System.out.println("--- ДЕБАГ СЕРВИСА ---");
-        System.out.println("Ищем коллекции для email: " + email);
+        System.out.println("userService debug: searching collections for user: " + email);
         List<Collection> collections = collectionRepository.findByUsersEmail(email);
         for (Collection col : collections) {
-            System.out.println("Коллекция: " + col.getName());
+            System.out.println("userService debug: collection: " + col.getName());
             if (col.getBooks() == null) {
-                System.out.println(" -> Список книг NULL!");
+                System.out.println("userService debug: books array is null");
             } else {
-                System.out.println(" -> Размер списка книг в Entity: " + col.getBooks().size());
+                System.out.println("userService debug: total qta of books: " + col.getBooks().size());
                 col.getBooks().forEach(b ->
-                        System.out.println("   -> Книга в Entity: ID=" + b.getId() + ", Title=" + b.getTitle())
+                        System.out.println("userService debug: books in collection: ID=" + b.getId() + ", Title=" + b.getTitle())
                 );
             }
         }
-        System.out.println("=============================");
-        System.out.println("Количество сырых сущностей из базы: " + collections.size());
+
+        System.out.println("userService debug: qta of entities of books: " + collections.size());
         for (Collection c : collections) {
-            System.out.println("Сущность из БД -> ID: " + c.getId() + ", Name: " + c.getName());
+            System.out.println("userService debug: entity from db - ID: " + c.getId() + ", Name: " + c.getName());
         }
 
         List<CollectionDTO> dtos = collections.stream()
                 .map(col -> new CollectionDTO(col))
                 .collect(Collectors.toList());
 
-        System.out.println("Количество DTO после маппинга: " + dtos.size());
-        System.out.println("---------------------");
+        System.out.println("userService debug: qta after mapping: " + dtos.size());
 
         return dtos;
     }

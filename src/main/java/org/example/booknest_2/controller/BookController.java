@@ -1,3 +1,5 @@
+//controller for all operations with books
+
 package org.example.booknest_2.controller;
 
 import org.example.booknest_2.dto.CollectionDTO;
@@ -7,18 +9,12 @@ import org.example.booknest_2.service.BookService;
 import org.example.booknest_2.service.CollectionService;
 import org.example.booknest_2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Controller
 public class BookController {
@@ -29,10 +25,6 @@ public class BookController {
     private AuthorRepository authorRepository;
     @Autowired
     private GenreRepository genreRepository;
-    @Autowired
-    private BookRepository bookRepository;
-    @Autowired
-    private CollectionService collectionService;
     @Autowired
     private UserService userService;
 
@@ -68,22 +60,20 @@ public class BookController {
             return "error/404";
         }
 
-        // Если дошли сюда — книга железно есть (либо из БД, либо только что создана)
         model.addAttribute("book", bookToShow);
         model.addAttribute("isLocal", true);
         model.addAttribute("iaId", ia);
 
-        // 2. Логика коллекций юзера (работает через userService)
         if (currentUser != null) {
             String email = currentUser.getUsername();
-            System.out.println("Залогинен юзер: " + email);
+            System.out.println("BookContr debug: user mail: " + email);
 
             List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
-            System.out.println("Найдено коллекций: " + (userCollections != null ? userCollections.size() : "null"));
+            System.out.println("BookContr debug: collections found: " + (userCollections != null ? userCollections.size() : "null"));
 
             model.addAttribute("collections", userCollections);
         } else {
-            System.out.println("Пользователь не залогинен");
+            System.out.println("BookContr debug: user not logged in");
         }
 
         return "book-details";

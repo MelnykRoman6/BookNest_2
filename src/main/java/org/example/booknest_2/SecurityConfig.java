@@ -19,10 +19,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")             // Наш GET-маппинг для показа страницы
-                        .loginProcessingUrl("/login")     // На этот URL форма шлет POST-запрос
-                        .defaultSuccessUrl("/", true)    // Куда перенаправить при успешном входе (например, на главную)
-                        .failureUrl("/login?error=true") // Куда кинуть при ошибке
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)    // where to redirect after successful login
+                        .failureUrl("/login?error=true") //where to redirect encountering error
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -35,6 +35,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Современный стандарт шифрования
+        return new BCryptPasswordEncoder();
     }
 }
