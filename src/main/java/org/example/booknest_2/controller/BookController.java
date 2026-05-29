@@ -2,11 +2,13 @@
 
 package org.example.booknest_2.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.misc.LogManager;
 import org.example.booknest_2.dto.CollectionDTO;
+import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
 import org.example.booknest_2.repository.*;
 import org.example.booknest_2.service.BookService;
-import org.example.booknest_2.service.CollectionService;
 import org.example.booknest_2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,8 +16,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Controller
 public class BookController {
 
@@ -25,6 +35,8 @@ public class BookController {
     private AuthorRepository authorRepository;
     @Autowired
     private GenreRepository genreRepository;
+    @Autowired
+    private BookRepository bookRepository;
     @Autowired
     private UserService userService;
 
@@ -66,16 +78,42 @@ public class BookController {
 
         if (currentUser != null) {
             String email = currentUser.getUsername();
-            System.out.println("BookContr debug: user mail: " + email);
+            log.info("BookContr debug: user mail: " + email);
 
             List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
-            System.out.println("BookContr debug: collections found: " + (userCollections != null ? userCollections.size() : "null"));
+            log.info("BookContr debug: collections found: " + (userCollections != null ? userCollections.size() : "null"));
 
             model.addAttribute("collections", userCollections);
         } else {
-            System.out.println("BookContr debug: user not logged in");
+            log.info("BookContr debug: user not logged in");
         }
 
         return "book-details";
+    }
+    @GetMapping("/book/{id}/read")
+    public String readBook(@PathVariable String id, Model model) {
+        Book book = bookService.getOrSaveBookDetails(id, null);
+        if (book == null) {
+            return "error/404";
+        }
+
+        String textContent = bookService.downloadAndSaveBookText(book);
+
+        if (textContent == null || textContent.isEmpty()) {
+            textContent = "Sorry, this book does not have an open-source digital text available for automatic download.";
+        }
+
+        String authorName = "Unknown Author";
+        if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
+            authorName = book.getAuthors().stream()
+                    .map(Author::getName)
+                    .collect(java.util.stream.Collectors.joining(", "));
+        }
+
+        model.addAttribute("book", book);
+        model.addAttribute("authorName", authorName);
+        model.addAttribute("textContent", textContent); // Передаем скачанный текст в JS-читалку
+
+        return "reader";
     }
 }

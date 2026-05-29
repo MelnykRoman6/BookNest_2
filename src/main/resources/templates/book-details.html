@@ -29,6 +29,14 @@
             </a>
         </div>
 
+        <div class="reader-button-wrapper" style="margin-top: 15px;">
+            <a th:href="@{/book/{id}/read(id=${book.openLibraryId})}"
+               class="btn-save"
+               style="display: inline-block; text-align: center; background-color: #2ecc71; text-decoration: none; width: 100%; box-sizing: border-box;">
+                📖 Read Online
+            </a>
+        </div>
+
         <div class="collection-form" th:if="${collections != null and !collections.empty}">
             <span class="collection-label">Add to collection:</span>
 

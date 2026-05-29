@@ -18,6 +18,10 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Lob
+    @Column(name = "file_content", columnDefinition = "TEXT")
+    private String fileContent;
+
     @Column(nullable = false)
     private String title;
 

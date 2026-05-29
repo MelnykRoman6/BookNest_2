@@ -1,5 +1,8 @@
 package org.example.booknest_2.service;
 
+import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.booknest_2.dto.ExternalBookDTO;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
@@ -10,7 +13,6 @@ import org.example.booknest_2.repository.BookRepository;
 import org.example.booknest_2.repository.SearchHistoryRepository;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -185,5 +187,67 @@ public class BookService {
         }
 
         return bookRepository.save(newBook);
+    }
+
+    public String downloadAndSaveBookText(Book book) {
+        if (book.getFileContent() != null && !book.getFileContent().isEmpty()) {
+            return book.getFileContent();
+        }
+
+        String olId = book.getOpenLibraryId();
+        System.out.println("START AUTOMATIC DOWNLOAD FOR BOOK: " + olId);
+
+        String iaId = fetchInternetArchiveId(olId);
+
+        if (iaId == null || iaId.isEmpty()) {
+            System.out.println("API OpenLibrary не предоставило IA ID для " + olId);
+            return null;
+        }
+
+        try {
+            String txtUrl = "https://archive.org/stream/" + iaId + "/" + iaId + "_djvu.txt";
+
+            System.out.println("Downloading full text from: " + txtUrl);
+            String fullText = restTemplate.getForObject(txtUrl, String.class);
+
+            if (fullText != null && !fullText.isEmpty()) {
+                if (fullText.length() > 5000000) {
+                    fullText = fullText.substring(0, 5000000);
+                }
+
+                book.setFileContent(fullText);
+                bookRepository.save(book);
+
+                System.out.println("SUCCESS: Text downloaded and saved to DB. Size: " + fullText.length() + " chars.");
+                return fullText;
+            }
+        } catch (Exception e) {
+            System.out.println("err downloading txt from Internet Archive: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    private String fetchInternetArchiveId(String openLibraryId) {
+        try {
+            String url = "https://openlibrary.org/works/" + openLibraryId + ".json";
+            String response = restTemplate.getForObject(url, String.class);
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+
+            if (root.has("ocaid")) {
+                return root.get("ocaid").asText();
+            }
+            if (root.has("ia_box_id")) {
+                JsonNode iaBox = root.get("ia_box_id");
+                if (iaBox.isArray() && !iaBox.isEmpty()) {
+                    return iaBox.get(0).asText();
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("no IA ID: " + e.getMessage());
+        }
+        return null;
     }
 }
