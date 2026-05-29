@@ -97,11 +97,10 @@ public class BookController {
             return "error/404";
         }
 
-        String textContent = bookService.downloadAndSaveBookText(book);
+        String iaId = bookService.fetchInternetArchiveId(book.getOpenLibraryId());
 
-        if (textContent == null || textContent.isEmpty()) {
-            textContent = "Sorry, this book does not have an open-source digital text available for automatic download.";
-        }
+        model.addAttribute("book", book);
+        model.addAttribute("iaId", iaId);
 
         String authorName = "Unknown Author";
         if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
@@ -109,10 +108,7 @@ public class BookController {
                     .map(Author::getName)
                     .collect(java.util.stream.Collectors.joining(", "));
         }
-
-        model.addAttribute("book", book);
         model.addAttribute("authorName", authorName);
-        model.addAttribute("textContent", textContent); // Передаем скачанный текст в JS-читалку
 
         return "reader";
     }

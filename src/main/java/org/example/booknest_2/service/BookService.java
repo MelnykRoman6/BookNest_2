@@ -228,25 +228,48 @@ public class BookService {
         return null;
     }
 
-    private String fetchInternetArchiveId(String openLibraryId) {
+    public String fetchInternetArchiveId(String openLibraryId) {
         try {
-            String url = "https://openlibrary.org/works/" + openLibraryId + ".json";
-            String response = restTemplate.getForObject(url, String.class);
+            String workUrl = "https://openlibrary.org/works/" + openLibraryId + ".json";
+            String response = restTemplate.getForObject(workUrl, String.class);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response);
 
-            if (root.has("ocaid")) {
-                return root.get("ocaid").asText();
-            }
-            if (root.has("ia_box_id")) {
-                JsonNode iaBox = root.get("ia_box_id");
-                if (iaBox.isArray() && !iaBox.isEmpty()) {
-                    return iaBox.get(0).asText();
+            String id = extractIaIdFromJson(root);
+            if (id != null) return id;
+
+            System.out.println("IA ID not found: " + openLibraryId);
+            String editionsUrl = "https://openlibrary.org/works/" + openLibraryId + "/editions.json";
+            String editionsResponse = restTemplate.getForObject(editionsUrl, String.class);
+
+            JsonNode editionsRoot = mapper.readTree(editionsResponse);
+            if (editionsRoot.has("entries") && editionsRoot.get("entries").isArray()) {
+                for (JsonNode edition : editionsRoot.get("entries")) {
+
+                    id = extractIaIdFromJson(edition);
+                    if (id != null) {
+                        System.out.println("iaid: " + id);
+                        return id;
+                    }
                 }
             }
+
         } catch (Exception e) {
-            System.out.println("no IA ID: " + e.getMessage());
+            System.out.println("err " + openLibraryId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    private String extractIaIdFromJson(JsonNode node) {
+        if (node.has("ocaid") && !node.get("ocaid").asText().trim().isEmpty()) {
+            return node.get("ocaid").asText().trim();
+        }
+        if (node.has("ia") && node.get("ia").isArray() && !node.get("ia").isEmpty()) {
+            return node.get("ia").get(0).asText().trim();
+        }
+        if (node.has("ia_box_id") && node.get("ia_box_id").isArray() && !node.get("ia_box_id").isEmpty()) {
+            return node.get("ia_box_id").get(0).asText().trim();
         }
         return null;
     }
