@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${isLocal ? book.title : externalBook.title}">Book Details</title>
     <link rel="stylesheet" th:href="@{/css/book.css}">
 </head>
@@ -16,28 +17,27 @@
 </div>
 
 <div class="details-wrapper">
-    <div class="side-panel">
-        <img th:src="${book.coverUrl}" class="book-cover" alt="Cover">
 
-        <div class="action-btns">
+    <div class="side-panel">
+        <img th:src="${isLocal ? book.coverUrl : externalBook.coverUrl}" class="book-cover" alt="Cover">
+
+        <div class="action-btns" style="margin-top: 15px;">
             <a th:if="${iaId != null}"
                th:href="'https://archive.org/details/' + ${iaId}"
                target="_blank"
                class="btn-action btn-green-reg"
-               style="text-align: center; text-decoration: none;">
-                Read Online
+               style="text-align: center; text-decoration: none; margin-bottom: 5px;">
+                Read Online (Archive)
             </a>
-        </div>
 
-        <div class="reader-button-wrapper" style="margin-top: 15px;">
-            <a th:href="@{/book/{id}/read(id=${book.openLibraryId})}"
-               class="btn-save"
-               style="display: inline-block; text-align: center; background-color: #2ecc71; text-decoration: none; width: 100%; box-sizing: border-box;">
+            <a th:href="@{/book/{id}/read(id=${isLocal ? book.openLibraryId : externalBook.openLibraryId})}"
+               class="btn-action btn-cyan"
+               style="text-align: center; text-decoration: none;">
                 📖 Read Online
             </a>
         </div>
 
-        <div class="collection-form" th:if="${collections != null and !collections.empty}">
+        <div class="collection-form" th:if="${collections != null and !collections.empty}" style="margin-top: 15px;">
             <span class="collection-label">Add to collection:</span>
 
             <form th:action="@{/collection/add-book}" method="POST" class="select-wrapper">
@@ -53,6 +53,7 @@
                 <button type="submit" class="btn-save">Save</button>
             </form>
         </div>
+    </div>
 
     <div class="main-content">
         <h1 th:text="${isLocal ? book.title : externalBook.title}">Book Title</h1>
@@ -70,9 +71,9 @@
         <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
 
         <h3>Description</h3>
-        <p class="description-text" th:text="${book.description != null ? book.description : 'No description available in Database.'}"></p>
+        <p class="description-text" th:text="${isLocal ? (book.description != null ? book.description : 'No description available in Database.') : (externalBook.description != null ? externalBook.description : 'No description available.')}"></p>
 
-        <div th:if="${isLocal and !#lists.isEmpty(book.reviews)}" style="margin-top: 40px;">
+        <div th:if="${isLocal and book != null and !#lists.isEmpty(book.reviews)}" style="margin-top: 40px;">
             <h3>Reviews</h3>
             <div th:each="review : ${book.reviews}" class="review-card">
                 <p th:text="${review.comment}">Review text</p>
@@ -80,6 +81,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 </body>
