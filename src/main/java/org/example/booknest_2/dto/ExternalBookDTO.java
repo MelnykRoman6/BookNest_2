@@ -2,6 +2,7 @@ package org.example.booknest_2.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.booknest_2.util.OpenLibraryUrls;
 
 @Getter
 @Setter
@@ -13,8 +14,6 @@ public class ExternalBookDTO {
     private String iaId;
 
     public String getCoverUrl() {
-        return (coverId != null && !coverId.isEmpty())
-                ? "https://covers.openlibrary.org/b/id/" + coverId + "-M.jpg"
-                : "https://via.placeholder.com/100x150?text=No+Cover";
+        return OpenLibraryUrls.cover(coverId);
     }
 }

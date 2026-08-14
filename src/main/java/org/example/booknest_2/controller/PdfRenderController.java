@@ -3,13 +3,14 @@ package org.example.booknest_2.controller;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.example.booknest_2.util.InternetArchiveUrls;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import javax.imageio.ImageIO;
@@ -18,14 +19,9 @@ import javax.imageio.ImageIO;
 @RequestMapping("/api/pdf")
 public class PdfRenderController {
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
     @GetMapping(value = "/render-page", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> renderPdfPage(@RequestParam String iaId, @RequestParam int page) {
-        String pdfUrl = "https://archive.org/download/" + iaId + "/" + iaId + ".pdf";
-
-        try (InputStream in = new URL(pdfUrl).openStream();
-             PDDocument document = Loader.loadPDF(in.readAllBytes())) {
+        try (PDDocument document = loadArchiveDocument(iaId)) {
 
             if (page < 0 || page >= document.getNumberOfPages()) {
                 return ResponseEntity.badRequest().build();
@@ -49,12 +45,16 @@ public class PdfRenderController {
 
     @GetMapping("/pages-count")
     public ResponseEntity<Integer> getPagesCount(@RequestParam String iaId) {
-        String pdfUrl = "https://archive.org/download/" + iaId + "/" + iaId + ".pdf";
-        try (InputStream in = new URL(pdfUrl).openStream();
-             PDDocument document = Loader.loadPDF(in.readAllBytes())) {
+        try (PDDocument document = loadArchiveDocument(iaId)) {
             return ResponseEntity.ok(document.getNumberOfPages());
         } catch (Exception e) {
             return ResponseEntity.status(500).body(0);
+        }
+    }
+
+    private static PDDocument loadArchiveDocument(String iaId) throws IOException {
+        try (InputStream in = new URL(InternetArchiveUrls.pdf(iaId)).openStream()) {
+            return Loader.loadPDF(in.readAllBytes());
         }
     }
 }

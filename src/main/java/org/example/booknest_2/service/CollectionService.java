@@ -4,6 +4,7 @@ import org.example.booknest_2.model.Book;
 import org.example.booknest_2.model.Collection;
 import org.example.booknest_2.repository.BookRepository;
 import org.example.booknest_2.repository.CollectionRepository;
+import org.example.booknest_2.util.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +20,10 @@ public class CollectionService {
     @Transactional
     public void addBookToCollection(String bookId, Long collectionId) {
         Collection collection = collectionRepository.findById(collectionId)
-                .orElseThrow(() -> new RuntimeException("Collection not found"));
+                .orElseThrow(NotFoundException.of("Collection", collectionId));
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(NotFoundException.of("Book", bookId));
 
         if (!collection.getBooks().contains(book)) {
             collection.getBooks().add(book);
