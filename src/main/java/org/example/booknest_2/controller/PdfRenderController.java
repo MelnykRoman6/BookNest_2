@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import javax.imageio.ImageIO;
@@ -22,9 +23,7 @@ public class PdfRenderController {
 
     @GetMapping(value = "/render-page", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> renderPdfPage(@RequestParam String iaId, @RequestParam int page) {
-        String pdfUrl = "https://archive.org/download/" + iaId + "/" + iaId + ".pdf";
-
-        try (InputStream in = new URL(pdfUrl).openStream();
+        try (InputStream in = openPdfStream(iaId);
              PDDocument document = Loader.loadPDF(in.readAllBytes())) {
 
             if (page < 0 || page >= document.getNumberOfPages()) {
@@ -49,12 +48,15 @@ public class PdfRenderController {
 
     @GetMapping("/pages-count")
     public ResponseEntity<Integer> getPagesCount(@RequestParam String iaId) {
-        String pdfUrl = "https://archive.org/download/" + iaId + "/" + iaId + ".pdf";
-        try (InputStream in = new URL(pdfUrl).openStream();
+        try (InputStream in = openPdfStream(iaId);
              PDDocument document = Loader.loadPDF(in.readAllBytes())) {
             return ResponseEntity.ok(document.getNumberOfPages());
         } catch (Exception e) {
             return ResponseEntity.status(500).body(0);
         }
+    }
+
+    protected InputStream openPdfStream(String iaId) throws IOException {
+        return new URL("https://archive.org/download/" + iaId + "/" + iaId + ".pdf").openStream();
     }
 }
