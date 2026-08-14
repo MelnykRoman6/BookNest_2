@@ -1,0 +1,82 @@
+/* shared styles for the error pages (404, 500) */
+
+body {
+    background-color: #0b0c10;
+    color: #45f3ff;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+}
+
+.error-container {
+    max-width: 900px;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 50px;
+    margin: 0;
+    color: #ff0055;
+    text-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+    letter-spacing: 4px;
+}
+
+.ascii-art-container {
+    display: inline-block;
+    margin: 25px 0;
+    text-shadow: 0 0 8px rgba(69, 243, 255, 0.3);
+}
+
+.ascii-art {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
+    white-space: pre;
+    color: #45f3ff;
+    text-align: left;
+}
+
+/* keeps wider art from wrapping */
+.ascii-art.compact {
+    font-size: 11px;
+}
+
+.error-tag {
+    color: #ff0055;
+    font-weight: bold;
+}
+
+p {
+    font-size: 18px;
+    color: #c5c6c7;
+    line-height: 1.6;
+    margin-top: 15px;
+    margin-bottom: 35px;
+}
+
+.btn-home {
+    display: inline-block;
+    padding: 12px 35px;
+    border: 2px solid #45f3ff;
+    color: #45f3ff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.btn-home:hover {
+    background-color: #45f3ff;
+    color: #0b0c10;
+    box-shadow: 0 0 25px #45f3ff;
+    transform: translateY(-2px);
+}

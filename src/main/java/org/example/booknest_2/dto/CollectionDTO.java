@@ -17,6 +17,12 @@ public class CollectionDTO {
     private List<String> bookIds;
     private List<String> bookTitles;
 
+    public static List<CollectionDTO> fromEntities(java.util.Collection<Collection> entities) {
+        return entities == null
+                ? List.of()
+                : entities.stream().map(CollectionDTO::new).collect(Collectors.toList());
+    }
+
     public CollectionDTO(Collection entity) {
         this.id = (long) entity.getId();
         this.name = entity.getName();

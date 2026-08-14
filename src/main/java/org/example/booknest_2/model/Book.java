@@ -3,6 +3,7 @@ package org.example.booknest_2.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.booknest_2.util.OpenLibraryUrls;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,9 +66,6 @@ public class Book {
     private Set<Format> formats;
 
     public String getCoverUrl() {
-        if (this.coverId != null && !this.coverId.isEmpty()) {
-            return "https://covers.openlibrary.org/b/id/" + this.coverId + "-M.jpg";
-        }
-        return "https://via.placeholder.com/100x150?text=No+Cover";
+        return OpenLibraryUrls.cover(coverId);
     }
 }

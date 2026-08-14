@@ -11,6 +11,9 @@ import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.AuthorRepository;
 import org.example.booknest_2.repository.BookRepository;
 import org.example.booknest_2.repository.SearchHistoryRepository;
+import org.example.booknest_2.util.InternetArchiveUrls;
+import org.example.booknest_2.util.OpenLibraryParser;
+import org.example.booknest_2.util.OpenLibraryUrls;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +57,7 @@ public class BookService {
 
     public List<ExternalBookDTO> searchExternalBooks(String query) {
         //forming openlibraryid
-        String url = "https://openlibrary.org/search.json?q=" + query.replace(" ", "+");
+        String url = OpenLibraryUrls.search(query);
 
         try {
             //api request
@@ -72,8 +75,7 @@ public class BookService {
                     dto.setAuthorName(authors != null && !authors.isEmpty() ? authors.get(0) : "Unknown");
 
                     // OpenLibrary ID
-                    String key = (String) doc.get("key");
-                    dto.setOpenLibraryId(key != null ? key.replace("/works/", "") : "");
+                    dto.setOpenLibraryId(OpenLibraryUrls.workIdFromKey((String) doc.get("key")));
 
                     // cover ID
                     Object coverI = doc.get("cover_i");
@@ -88,22 +90,17 @@ public class BookService {
         }
     }
     public Map<String, Object> getExternalBookDetails(String openLibraryId) {
-        String url = "https://openlibrary.org/works/" + openLibraryId + ".json";
+        String url = OpenLibraryUrls.work(openLibraryId);
         try {
             Map<String, Object> details = restTemplate.getForObject(url, Map.class);
             if (details != null) {
                 if (details.containsKey("description")) {
-                    Object desc = details.get("description");
-                    if (desc instanceof Map) {
-                        details.put("description", ((Map<?, ?>) desc).get("value"));
-                    }
+                    details.put("description", OpenLibraryParser.extractDescription(details.get("description")));
                 }
 
-                if (details.containsKey("covers")) {
-                    List<Object> covers = (List<Object>) details.get("covers");
-                    if (covers != null && !covers.isEmpty()) {
-                        details.put("cover_id", covers.get(0).toString());
-                    }
+                String coverId = OpenLibraryParser.extractFirstCoverId(details.get("covers"));
+                if (coverId != null) {
+                    details.put("cover_id", coverId);
                 }
             }
             return details;
@@ -145,13 +142,7 @@ public class BookService {
         newBook.setTitle((String) details.get("title"));
 
         if (details.containsKey("description")) {
-            Object rawDescription = details.get("description");
-            if (rawDescription instanceof String) {
-                newBook.setDescription((String) rawDescription);
-            } else if (rawDescription instanceof Map) {
-                Map<?, ?> descMap = (Map<?, ?>) rawDescription;
-                newBook.setDescription((String) descMap.get("value"));
-            }
+            newBook.setDescription(OpenLibraryParser.extractDescription(details.get("description")));
         }
 
         if (details.containsKey("cover_id")) {
@@ -165,12 +156,8 @@ public class BookService {
             for (Map<String, Object> authData : authorsList) {
                 Map<String, Object> authRef = (Map<String, Object>) authData.get("author");
                 if (authRef != null) {
-                    String authKey = ((String) authRef.get("key")).replace("/authors/", "");
+                    String authKey = OpenLibraryUrls.authorIdFromKey((String) authRef.get("key"));
 
-                    String authName = (String) authData.get("name");
-                    if (authName == null) authName = "Unknown Author";
-
-                    String rawName = (String) authData.get("name");
                     final String finalAuthName = (passedAuthorName != null) ? passedAuthorName : "Unknown Author";
                     System.out.println("DEBUG: Saving book with author name: " + passedAuthorName);
                     Author author = authorRepository.findByOpenLibraryAuthorId(authKey)
@@ -205,7 +192,7 @@ public class BookService {
         }
 
         try {
-            String txtUrl = "https://archive.org/stream/" + iaId + "/" + iaId + "_djvu.txt";
+            String txtUrl = InternetArchiveUrls.fullText(iaId);
 
             System.out.println("Downloading full text from: " + txtUrl);
             String fullText = restTemplate.getForObject(txtUrl, String.class);
@@ -230,24 +217,24 @@ public class BookService {
 
     public String fetchInternetArchiveId(String openLibraryId) {
         try {
-            String workUrl = "https://openlibrary.org/works/" + openLibraryId + ".json";
+            String workUrl = OpenLibraryUrls.work(openLibraryId);
             String response = restTemplate.getForObject(workUrl, String.class);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response);
 
-            String id = extractIaIdFromJson(root);
+            String id = OpenLibraryParser.extractIaId(root);
             if (id != null) return id;
 
             System.out.println("IA ID not found: " + openLibraryId);
-            String editionsUrl = "https://openlibrary.org/works/" + openLibraryId + "/editions.json";
+            String editionsUrl = OpenLibraryUrls.editions(openLibraryId);
             String editionsResponse = restTemplate.getForObject(editionsUrl, String.class);
 
             JsonNode editionsRoot = mapper.readTree(editionsResponse);
             if (editionsRoot.has("entries") && editionsRoot.get("entries").isArray()) {
                 for (JsonNode edition : editionsRoot.get("entries")) {
 
-                    id = extractIaIdFromJson(edition);
+                    id = OpenLibraryParser.extractIaId(edition);
                     if (id != null) {
                         System.out.println("iaid: " + id);
                         return id;
@@ -257,19 +244,6 @@ public class BookService {
 
         } catch (Exception e) {
             System.out.println("err " + openLibraryId + ": " + e.getMessage());
-        }
-        return null;
-    }
-
-    private String extractIaIdFromJson(JsonNode node) {
-        if (node.has("ocaid") && !node.get("ocaid").asText().trim().isEmpty()) {
-            return node.get("ocaid").asText().trim();
-        }
-        if (node.has("ia") && node.get("ia").isArray() && !node.get("ia").isEmpty()) {
-            return node.get("ia").get(0).asText().trim();
-        }
-        if (node.has("ia_box_id") && node.get("ia_box_id").isArray() && !node.get("ia_box_id").isEmpty()) {
-            return node.get("ia_box_id").get(0).asText().trim();
         }
         return null;
     }
