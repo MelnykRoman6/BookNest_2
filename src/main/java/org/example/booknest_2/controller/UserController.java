@@ -3,6 +3,7 @@
 package org.example.booknest_2.controller;
 
 import org.example.booknest_2.dto.CollectionDTO;
+import org.example.booknest_2.exception.ResourceNotFoundException;
 import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.UsersRepository;
 import org.example.booknest_2.service.UserService;
@@ -31,7 +32,7 @@ public class UserController {
         String email = currentUser.getUsername();
 
         Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user " + email + " not found"));
 
         List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
 

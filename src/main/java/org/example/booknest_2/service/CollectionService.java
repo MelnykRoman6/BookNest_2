@@ -1,5 +1,6 @@
 package org.example.booknest_2.service;
 
+import org.example.booknest_2.exception.ResourceNotFoundException;
 import org.example.booknest_2.model.Book;
 import org.example.booknest_2.model.Collection;
 import org.example.booknest_2.repository.BookRepository;
@@ -19,10 +20,10 @@ public class CollectionService {
     @Transactional
     public void addBookToCollection(String bookId, Long collectionId) {
         Collection collection = collectionRepository.findById(collectionId)
-                .orElseThrow(() -> new RuntimeException("Collection not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Collection " + collectionId + " not found"));
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book " + bookId + " not found"));
 
         if (!collection.getBooks().contains(book)) {
             collection.getBooks().add(book);
