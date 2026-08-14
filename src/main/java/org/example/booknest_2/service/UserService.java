@@ -19,32 +19,9 @@ public class UserService {
     private CollectionRepository collectionRepository;
 
     public List<CollectionDTO> getCollectionsByEmail(String email) {
-        System.out.println("userService debug: searching collections for user: " + email);
-        List<Collection> collections = collectionRepository.findByUsersEmail(email);
-        for (Collection col : collections) {
-            System.out.println("userService debug: collection: " + col.getName());
-            if (col.getBooks() == null) {
-                System.out.println("userService debug: books array is null");
-            } else {
-                System.out.println("userService debug: total qta of books: " + col.getBooks().size());
-                col.getBooks().forEach(b ->
-                        System.out.println("userService debug: books in collection: ID=" + b.getId() + ", Title=" + b.getTitle())
-                );
-            }
-        }
-
-        System.out.println("userService debug: qta of entities of books: " + collections.size());
-        for (Collection c : collections) {
-            System.out.println("userService debug: entity from db - ID: " + c.getId() + ", Name: " + c.getName());
-        }
-
-        List<CollectionDTO> dtos = collections.stream()
-                .map(col -> new CollectionDTO(col))
+        return collectionRepository.findByUsersEmail(email).stream()
+                .map(CollectionDTO::new)
                 .collect(Collectors.toList());
-
-        System.out.println("userService debug: qta after mapping: " + dtos.size());
-
-        return dtos;
     }
 
     public ProfileDTO getUserProfileData(Long userId) {
