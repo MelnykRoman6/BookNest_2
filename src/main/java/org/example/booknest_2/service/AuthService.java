@@ -2,6 +2,7 @@ package org.example.booknest_2.service;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.example.booknest_2.exception.RegistrationSessionException;
 import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.CollectionRepository;
 import org.example.booknest_2.repository.UsersRepository;
@@ -45,12 +46,13 @@ public class AuthService {
     @Transactional
     public void registerUser(String password, HttpSession session) {
         System.out.println("register user in");
-        Users newUser = new Users();
         String email = (String) session.getAttribute("temp_email");
-        System.out.println("got email: " + email);
-        if (email != null) {
-            newUser.setEmail(email);
+        if (email == null) {
+            throw new RegistrationSessionException("No verified email in session, registration must be restarted");
         }
+
+        Users newUser = new Users();
+        newUser.setEmail(email);
 
         //creates user after verif
         newUser.setVerified(true);

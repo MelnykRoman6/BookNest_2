@@ -1,6 +1,7 @@
 package org.example.booknest_2.service;
 
 import org.example.booknest_2.dto.CollectionDTO;
+import org.example.booknest_2.exception.ResourceNotFoundException;
 import org.example.booknest_2.dto.ProfileDTO;
 import org.example.booknest_2.model.Collection;
 import org.example.booknest_2.model.Users;
@@ -49,7 +50,7 @@ public class UserService {
 
     public ProfileDTO getUserProfileData(Long userId) {
         Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User " + userId + " not found"));
 
         ProfileDTO dto = new ProfileDTO();
         dto.setEmail(user.getEmail());

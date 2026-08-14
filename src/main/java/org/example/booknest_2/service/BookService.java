@@ -1,9 +1,15 @@
 package org.example.booknest_2.service;
 
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.example.booknest_2.dto.ExternalBookDTO;
+import org.example.booknest_2.exception.ExternalServiceException;
+import org.example.booknest_2.exception.ResourceNotFoundException;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
 import org.example.booknest_2.model.SearchHistory;
@@ -17,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 public class BookService {
     @Autowired
@@ -29,6 +36,8 @@ public class BookService {
     private AuthorRepository authorRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
+
+    private static final int MAX_TEXT_LENGTH = 5_000_000;
 
     public List<Book> searchLocalBooks(String title, Long authorId, Long genreId, Users currentUser) {
         if (currentUser != null && title != null && !title.isEmpty()) {
@@ -59,7 +68,9 @@ public class BookService {
         try {
             //api request
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-            List<Map<String, Object>> docs = (List<Map<String, Object>>) response.get("docs");
+            List<Map<String, Object>> docs = response == null
+                    ? null
+                    : (List<Map<String, Object>>) response.get("docs");
 
             List<ExternalBookDTO> results = new ArrayList<>();
             if (docs != null) {
@@ -83,7 +94,9 @@ public class BookService {
                 }
             }
             return results;
-        } catch (Exception e) {
+        } catch (RestClientException e) {
+            //external search is best-effort: local results are still shown, but the failure must be visible
+            log.warn("OpenLibrary search failed for query '{}'", query, e);
             return new ArrayList<>();
         }
     }
@@ -106,29 +119,27 @@ public class BookService {
                     }
                 }
             }
+            if (details == null) {
+                throw new ResourceNotFoundException("OpenLibrary returned no details for work " + openLibraryId);
+            }
             return details;
-        } catch (Exception e) {
-            return null;
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ResourceNotFoundException("Unknown OpenLibrary work " + openLibraryId, e);
+        } catch (RestClientException e) {
+            throw new ExternalServiceException("Could not load OpenLibrary work " + openLibraryId, e);
         }
     }
 
     public Book getOrSaveBookDetails(String id, String authorName) {
         Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
-        System.out.println("bookService DEBUG: Service searching ID: " + id);
-        System.out.println("bookService DEBUG: Service received Author Name: " + authorName);
-
-        if (localBook.isEmpty()) {
-            try {
-                localBook = bookRepository.findByOpenLibraryId(id);
-            } catch (NumberFormatException ignored) {}
-        }
+        log.debug("Searching book by OpenLibrary id {} (author name: {})", id, authorName);
 
         if (localBook.isPresent()) {
             return localBook.get();
-        } else {
-            System.out.println("bookService debug: Book not found locally. Saving external book from OL...");
-            return saveExternalBook(id, authorName);
         }
+
+        log.debug("Book {} not found locally, importing it from OpenLibrary", id);
+        return saveExternalBook(id, authorName);
     }
 
     @Transactional
@@ -138,7 +149,6 @@ public class BookService {
         if (existing.isPresent()) return existing.get();
 
         Map<String, Object> details = getExternalBookDetails(openLibraryId);
-        if (details == null) return null;
 
         Book newBook = new Book();
         newBook.setOpenLibraryId(openLibraryId);
@@ -167,12 +177,8 @@ public class BookService {
                 if (authRef != null) {
                     String authKey = ((String) authRef.get("key")).replace("/authors/", "");
 
-                    String authName = (String) authData.get("name");
-                    if (authName == null) authName = "Unknown Author";
-
-                    String rawName = (String) authData.get("name");
                     final String finalAuthName = (passedAuthorName != null) ? passedAuthorName : "Unknown Author";
-                    System.out.println("DEBUG: Saving book with author name: " + passedAuthorName);
+                    log.debug("Saving book {} with author name: {}", openLibraryId, finalAuthName);
                     Author author = authorRepository.findByOpenLibraryAuthorId(authKey)
                             .orElseGet(() -> {
                                 Author newAuthor = new Author();
@@ -195,42 +201,44 @@ public class BookService {
         }
 
         String olId = book.getOpenLibraryId();
-        System.out.println("START AUTOMATIC DOWNLOAD FOR BOOK: " + olId);
+        log.debug("Starting full text download for book {}", olId);
 
         String iaId = fetchInternetArchiveId(olId);
 
         if (iaId == null || iaId.isEmpty()) {
-            System.out.println("API OpenLibrary не предоставило IA ID для " + olId);
-            return null;
+            throw new ResourceNotFoundException("OpenLibrary exposes no Internet Archive id for work " + olId);
         }
 
+        String txtUrl = "https://archive.org/stream/" + iaId + "/" + iaId + "_djvu.txt";
+        String fullText;
         try {
-            String txtUrl = "https://archive.org/stream/" + iaId + "/" + iaId + "_djvu.txt";
-
-            System.out.println("Downloading full text from: " + txtUrl);
-            String fullText = restTemplate.getForObject(txtUrl, String.class);
-
-            if (fullText != null && !fullText.isEmpty()) {
-                if (fullText.length() > 5000000) {
-                    fullText = fullText.substring(0, 5000000);
-                }
-
-                book.setFileContent(fullText);
-                bookRepository.save(book);
-
-                System.out.println("SUCCESS: Text downloaded and saved to DB. Size: " + fullText.length() + " chars.");
-                return fullText;
-            }
-        } catch (Exception e) {
-            System.out.println("err downloading txt from Internet Archive: " + e.getMessage());
+            log.debug("Downloading full text from {}", txtUrl);
+            fullText = restTemplate.getForObject(txtUrl, String.class);
+        } catch (RestClientException e) {
+            throw new ExternalServiceException("Could not download book text from " + txtUrl, e);
         }
 
-        return null;
+        if (fullText == null || fullText.isEmpty()) {
+            throw new ResourceNotFoundException("Internet Archive returned no text for " + iaId);
+        }
+
+        if (fullText.length() > MAX_TEXT_LENGTH) {
+            fullText = fullText.substring(0, MAX_TEXT_LENGTH);
+        }
+
+        book.setFileContent(fullText);
+        bookRepository.save(book);
+        log.debug("Stored {} characters of text for book {}", fullText.length(), olId);
+
+        return fullText;
     }
 
+    //returns null when OpenLibrary knows the work but exposes no Internet Archive id for it
     public String fetchInternetArchiveId(String openLibraryId) {
+        String workUrl = "https://openlibrary.org/works/" + openLibraryId + ".json";
+        String editionsUrl = "https://openlibrary.org/works/" + openLibraryId + "/editions.json";
+
         try {
-            String workUrl = "https://openlibrary.org/works/" + openLibraryId + ".json";
             String response = restTemplate.getForObject(workUrl, String.class);
 
             ObjectMapper mapper = new ObjectMapper();
@@ -239,26 +247,26 @@ public class BookService {
             String id = extractIaIdFromJson(root);
             if (id != null) return id;
 
-            System.out.println("IA ID not found: " + openLibraryId);
-            String editionsUrl = "https://openlibrary.org/works/" + openLibraryId + "/editions.json";
+            log.debug("No Internet Archive id on work {}, falling back to its editions", openLibraryId);
             String editionsResponse = restTemplate.getForObject(editionsUrl, String.class);
 
             JsonNode editionsRoot = mapper.readTree(editionsResponse);
             if (editionsRoot.has("entries") && editionsRoot.get("entries").isArray()) {
                 for (JsonNode edition : editionsRoot.get("entries")) {
-
                     id = extractIaIdFromJson(edition);
                     if (id != null) {
-                        System.out.println("iaid: " + id);
+                        log.debug("Resolved Internet Archive id {} for work {}", id, openLibraryId);
                         return id;
                     }
                 }
             }
-
-        } catch (Exception e) {
-            System.out.println("err " + openLibraryId + ": " + e.getMessage());
+            return null;
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ResourceNotFoundException("Unknown OpenLibrary work " + openLibraryId, e);
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new ExternalServiceException(
+                    "Could not resolve Internet Archive id for work " + openLibraryId, e);
         }
-        return null;
     }
 
     private String extractIaIdFromJson(JsonNode node) {

@@ -3,7 +3,6 @@
 package org.example.booknest_2.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.misc.LogManager;
 import org.example.booknest_2.dto.CollectionDTO;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
@@ -68,24 +67,16 @@ public class BookController {
 
         Book bookToShow = bookService.getOrSaveBookDetails(id, authorName);
 
-        if (bookToShow == null) {
-            return "error/404";
-        }
-
         model.addAttribute("book", bookToShow);
         model.addAttribute("isLocal", true);
         model.addAttribute("iaId", ia);
 
         if (currentUser != null) {
             String email = currentUser.getUsername();
-            log.info("BookContr debug: user mail: " + email);
-
             List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
-            log.info("BookContr debug: collections found: " + (userCollections != null ? userCollections.size() : "null"));
+            log.debug("Found {} collections for user {}", userCollections.size(), email);
 
             model.addAttribute("collections", userCollections);
-        } else {
-            log.info("BookContr debug: user not logged in");
         }
 
         return "book-details";
@@ -93,9 +84,6 @@ public class BookController {
     @GetMapping("/book/{id}/read")
     public String readBook(@PathVariable String id, Model model) {
         Book book = bookService.getOrSaveBookDetails(id, null);
-        if (book == null) {
-            return "error/404";
-        }
 
         String iaId = bookService.fetchInternetArchiveId(book.getOpenLibraryId());
 
