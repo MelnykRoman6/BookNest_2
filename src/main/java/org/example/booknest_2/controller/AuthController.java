@@ -19,21 +19,35 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register/confirm")
-    public String confirmRegistration(@RequestParam String password, HttpSession session) {
-        authService.registerUser(password, session);
+    public String confirmRegistration(@RequestParam("ver_code") String verificationCode,
+                                      @RequestParam String password,
+                                      HttpSession session,
+                                      Model model) {
+        try {
+            authService.registerUser(verificationCode, password, session);
+        } catch (AuthService.RegistrationException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("tempEmail", session.getAttribute(AuthService.SESSION_EMAIL));
+            return "register";
+        } catch (Exception e) {
+            log.error("Registration failed", e);
+            model.addAttribute("error", "Registration failed. Please try again.");
+            return "register";
+        }
         return "redirect:/login?success";
     }
 
     @PostMapping("/register/send-code")
     public String sendCode(@RequestParam String email, HttpSession session, Model model) {
-        log.info("authContr debug: received mail: " + email);
         try {
             authService.sendVerificationCode(email, session);
             model.addAttribute("msg", "Code sent to " + email);
             model.addAttribute("tempEmail", email);
-            log.info("try");
+        } catch (AuthService.RegistrationException e) {
+            model.addAttribute("error", e.getMessage());
         } catch (Exception e) {
-            model.addAttribute("error", "Error: " + e.getMessage());
+            log.error("Sending the verification code failed", e);
+            model.addAttribute("error", "Could not send the verification code. Please try again.");
         }
         return "register";
     }

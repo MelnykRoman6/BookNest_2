@@ -1,5 +1,6 @@
 package org.example.booknest_2.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,14 +12,21 @@ import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.AuthorRepository;
 import org.example.booknest_2.repository.BookRepository;
 import org.example.booknest_2.repository.SearchHistoryRepository;
+import org.example.booknest_2.util.ExternalIds;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 public class BookService {
+
+    private static final int MAX_QUERY_LENGTH = 200;
+    private static final int MAX_BOOK_TEXT_LENGTH = 5_000_000;
+
     @Autowired
     private BookRepository bookRepository;
 
@@ -53,8 +61,15 @@ public class BookService {
     }
 
     public List<ExternalBookDTO> searchExternalBooks(String query) {
-        //forming openlibraryid
-        String url = "https://openlibrary.org/search.json?q=" + query.replace(" ", "+");
+        if (query == null || query.isBlank() || query.length() > MAX_QUERY_LENGTH) {
+            return new ArrayList<>();
+        }
+
+        String url = UriComponentsBuilder.fromUriString("https://openlibrary.org/search.json")
+                .queryParam("q", query)
+                .build()
+                .encode()
+                .toUriString();
 
         try {
             //api request
@@ -88,6 +103,9 @@ public class BookService {
         }
     }
     public Map<String, Object> getExternalBookDetails(String openLibraryId) {
+        if (!ExternalIds.isValidOpenLibraryId(openLibraryId)) {
+            return null;
+        }
         String url = "https://openlibrary.org/works/" + openLibraryId + ".json";
         try {
             Map<String, Object> details = restTemplate.getForObject(url, Map.class);
@@ -113,26 +131,23 @@ public class BookService {
     }
 
     public Book getOrSaveBookDetails(String id, String authorName) {
-        Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
-        System.out.println("bookService DEBUG: Service searching ID: " + id);
-        System.out.println("bookService DEBUG: Service received Author Name: " + authorName);
-
-        if (localBook.isEmpty()) {
-            try {
-                localBook = bookRepository.findByOpenLibraryId(id);
-            } catch (NumberFormatException ignored) {}
+        if (!ExternalIds.isValidOpenLibraryId(id)) {
+            return null;
         }
 
+        Optional<Book> localBook = bookRepository.findByOpenLibraryId(id);
         if (localBook.isPresent()) {
             return localBook.get();
-        } else {
-            System.out.println("bookService debug: Book not found locally. Saving external book from OL...");
-            return saveExternalBook(id, authorName);
         }
+        return saveExternalBook(id, authorName);
     }
 
     @Transactional
     public Book saveExternalBook(String openLibraryId, String passedAuthorName) {
+        if (!ExternalIds.isValidOpenLibraryId(openLibraryId)) {
+            return null;
+        }
+
         //duplicate verif
         Optional<Book> existing = bookRepository.findByOpenLibraryId(openLibraryId);
         if (existing.isPresent()) return existing.get();
@@ -167,12 +182,7 @@ public class BookService {
                 if (authRef != null) {
                     String authKey = ((String) authRef.get("key")).replace("/authors/", "");
 
-                    String authName = (String) authData.get("name");
-                    if (authName == null) authName = "Unknown Author";
-
-                    String rawName = (String) authData.get("name");
                     final String finalAuthName = (passedAuthorName != null) ? passedAuthorName : "Unknown Author";
-                    System.out.println("DEBUG: Saving book with author name: " + passedAuthorName);
                     Author author = authorRepository.findByOpenLibraryAuthorId(authKey)
                             .orElseGet(() -> {
                                 Author newAuthor = new Author();
@@ -195,40 +205,37 @@ public class BookService {
         }
 
         String olId = book.getOpenLibraryId();
-        System.out.println("START AUTOMATIC DOWNLOAD FOR BOOK: " + olId);
-
         String iaId = fetchInternetArchiveId(olId);
 
         if (iaId == null || iaId.isEmpty()) {
-            System.out.println("API OpenLibrary не предоставило IA ID для " + olId);
             return null;
         }
 
         try {
             String txtUrl = "https://archive.org/stream/" + iaId + "/" + iaId + "_djvu.txt";
-
-            System.out.println("Downloading full text from: " + txtUrl);
             String fullText = restTemplate.getForObject(txtUrl, String.class);
 
             if (fullText != null && !fullText.isEmpty()) {
-                if (fullText.length() > 5000000) {
-                    fullText = fullText.substring(0, 5000000);
+                if (fullText.length() > MAX_BOOK_TEXT_LENGTH) {
+                    fullText = fullText.substring(0, MAX_BOOK_TEXT_LENGTH);
                 }
 
                 book.setFileContent(fullText);
                 bookRepository.save(book);
 
-                System.out.println("SUCCESS: Text downloaded and saved to DB. Size: " + fullText.length() + " chars.");
                 return fullText;
             }
         } catch (Exception e) {
-            System.out.println("err downloading txt from Internet Archive: " + e.getMessage());
+            log.warn("Could not download the book text from the Internet Archive", e);
         }
 
         return null;
     }
 
     public String fetchInternetArchiveId(String openLibraryId) {
+        if (!ExternalIds.isValidOpenLibraryId(openLibraryId)) {
+            return null;
+        }
         try {
             String workUrl = "https://openlibrary.org/works/" + openLibraryId + ".json";
             String response = restTemplate.getForObject(workUrl, String.class);
@@ -239,7 +246,6 @@ public class BookService {
             String id = extractIaIdFromJson(root);
             if (id != null) return id;
 
-            System.out.println("IA ID not found: " + openLibraryId);
             String editionsUrl = "https://openlibrary.org/works/" + openLibraryId + "/editions.json";
             String editionsResponse = restTemplate.getForObject(editionsUrl, String.class);
 
@@ -249,28 +255,26 @@ public class BookService {
 
                     id = extractIaIdFromJson(edition);
                     if (id != null) {
-                        System.out.println("iaid: " + id);
                         return id;
                     }
                 }
             }
 
         } catch (Exception e) {
-            System.out.println("err " + openLibraryId + ": " + e.getMessage());
+            log.warn("Could not resolve the Internet Archive id for an OpenLibrary work", e);
         }
         return null;
     }
 
     private String extractIaIdFromJson(JsonNode node) {
+        String id = null;
         if (node.has("ocaid") && !node.get("ocaid").asText().trim().isEmpty()) {
-            return node.get("ocaid").asText().trim();
+            id = node.get("ocaid").asText().trim();
+        } else if (node.has("ia") && node.get("ia").isArray() && !node.get("ia").isEmpty()) {
+            id = node.get("ia").get(0).asText().trim();
+        } else if (node.has("ia_box_id") && node.get("ia_box_id").isArray() && !node.get("ia_box_id").isEmpty()) {
+            id = node.get("ia_box_id").get(0).asText().trim();
         }
-        if (node.has("ia") && node.get("ia").isArray() && !node.get("ia").isEmpty()) {
-            return node.get("ia").get(0).asText().trim();
-        }
-        if (node.has("ia_box_id") && node.get("ia_box_id").isArray() && !node.get("ia_box_id").isEmpty()) {
-            return node.get("ia_box_id").get(0).asText().trim();
-        }
-        return null;
+        return ExternalIds.isValidInternetArchiveId(id) ? id : null;
     }
 }

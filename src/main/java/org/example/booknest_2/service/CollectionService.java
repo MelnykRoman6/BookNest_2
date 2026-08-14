@@ -17,8 +17,8 @@ public class CollectionService {
     private BookRepository bookRepository;
 
     @Transactional
-    public void addBookToCollection(String bookId, Long collectionId) {
-        Collection collection = collectionRepository.findById(collectionId)
+    public void addBookToCollection(String bookId, Long collectionId, String ownerEmail) {
+        Collection collection = collectionRepository.findOwnedByEmail(collectionId, ownerEmail)
                 .orElseThrow(() -> new RuntimeException("Collection not found"));
 
         Book book = bookRepository.findById(bookId)

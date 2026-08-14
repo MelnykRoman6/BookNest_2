@@ -3,13 +3,13 @@
 package org.example.booknest_2.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.misc.LogManager;
 import org.example.booknest_2.dto.CollectionDTO;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
 import org.example.booknest_2.repository.*;
 import org.example.booknest_2.service.BookService;
 import org.example.booknest_2.service.UserService;
+import org.example.booknest_2.util.ExternalIds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -74,18 +74,11 @@ public class BookController {
 
         model.addAttribute("book", bookToShow);
         model.addAttribute("isLocal", true);
-        model.addAttribute("iaId", ia);
+        model.addAttribute("iaId", ExternalIds.isValidInternetArchiveId(ia) ? ia : null);
 
         if (currentUser != null) {
-            String email = currentUser.getUsername();
-            log.info("BookContr debug: user mail: " + email);
-
-            List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
-            log.info("BookContr debug: collections found: " + (userCollections != null ? userCollections.size() : "null"));
-
+            List<CollectionDTO> userCollections = userService.getCollectionsByEmail(currentUser.getUsername());
             model.addAttribute("collections", userCollections);
-        } else {
-            log.info("BookContr debug: user not logged in");
         }
 
         return "book-details";
