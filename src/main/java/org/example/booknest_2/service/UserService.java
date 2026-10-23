@@ -2,7 +2,9 @@ package org.example.booknest_2.service;
 
 import org.example.booknest_2.dto.CollectionDTO;
 import org.example.booknest_2.dto.ProfileDTO;
+import org.example.booknest_2.dto.SearchHistoryDTO;
 import org.example.booknest_2.model.Collection;
+import org.example.booknest_2.model.SearchHistory;
 import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private CollectionRepository collectionRepository;
+    @Autowired
+    private SearchHistoryRepository searchHistoryRepository;
 
     public List<CollectionDTO> getCollectionsByEmail(String email) {
         System.out.println("userService debug: searching collections for user: " + email);
@@ -34,6 +38,7 @@ public class UserService {
         }
 
         System.out.println("userService debug: qta of entities of books: " + collections.size());
+        
         for (Collection c : collections) {
             System.out.println("userService debug: entity from db - ID: " + c.getId() + ", Name: " + c.getName());
         }
@@ -43,6 +48,16 @@ public class UserService {
                 .collect(Collectors.toList());
 
         System.out.println("userService debug: qta after mapping: " + dtos.size());
+
+        return dtos;
+    }
+
+    public List<SearchHistoryDTO> getSearchHistoryByEmail(String email) {
+        List<SearchHistory> searchHistory = searchHistoryRepository.findByUsersEmail(email);
+        System.out.println("userService debug: qta of entities of search history: " + searchHistory.size());
+        List<SearchHistoryDTO> dtos = searchHistory.stream()
+                .map(sh -> new SearchHistoryDTO(sh))
+                .collect(Collectors.toList());
 
         return dtos;
     }

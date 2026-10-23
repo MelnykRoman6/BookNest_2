@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.misc.LogManager;
 import org.example.booknest_2.dto.CollectionDTO;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
+import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.*;
 import org.example.booknest_2.service.BookService;
 import org.example.booknest_2.service.UserService;
@@ -23,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,6 +38,8 @@ public class BookController {
     @Autowired
     private GenreRepository genreRepository;
     @Autowired
+    private UsersRepository usersRepository;
+    @Autowired
     private BookRepository bookRepository;
     @Autowired
     private UserService userService;
@@ -44,13 +48,20 @@ public class BookController {
     public String index(@RequestParam(required = false) String search,
                         @RequestParam(required = false) Long author,
                         @RequestParam(required = false) Long genre,
-                        Model model) {
+                        Model model, @AuthenticationPrincipal UserDetails currentUser) {
 
         model.addAttribute("authors", authorRepository.findAll());
         model.addAttribute("genres", genreRepository.findAll());
 
+        Users currentUserObj = null;
+        String userEmail = null;
+        if (currentUser != null) {
+            userEmail = currentUser.getUsername();
+            currentUserObj = usersRepository.findByEmail(userEmail);
+        }
+
         if (search != null || author != null || genre != null) {
-            List<Book> localBooks = bookService.searchLocalBooks(search, author, genre, null);
+            List<Book> localBooks = bookService.searchLocalBooks(search, author, genre, currentUserObj);
             model.addAttribute("localBooks", localBooks);
 
             if (search != null && !search.isEmpty()) {

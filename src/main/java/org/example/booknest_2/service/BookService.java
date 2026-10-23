@@ -1,5 +1,6 @@
 package org.example.booknest_2.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,24 +32,27 @@ public class BookService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public List<Book> searchLocalBooks(String title, Long authorId, Long genreId, Users currentUser) {
-        if (currentUser != null && title != null && !title.isEmpty()) {
+        System.out.println("book service DEBUG: Searching local books with title: " + title);
+        if (currentUser != null) {
             saveSearchHistory(currentUser, title);
         }
         return bookRepository.searchBooks(title, authorId, genreId);
     }
 
     private void saveSearchHistory(Users user, String query) {
-
+        System.out.println("book service DEBUG: Saving search history for user: " + user.getEmail() + ", query: " + query);
         //verif to not duplicate history searches if they're in the same day
         LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
         var existing = searchHistoryRepository.findByUserAndSearchCriteriaAndSearchDateAfter(user, query, oneDayAgo);
-
+        System.out.println("book service DEBUG: Existing search history found: " + existing.isPresent());
         if (existing.isEmpty()) {
+            System.out.println("book service DEBUG: No existing search history found for this query in the last 24 hours. Saving new entry.");
             SearchHistory history = new SearchHistory();
             history.setUser(user);
             history.setSearchCriteria(query);
             history.setSearchDate(LocalDateTime.now());
             searchHistoryRepository.save(history);
+
         }
     }
 
@@ -172,7 +176,7 @@ public class BookService {
 
                     String rawName = (String) authData.get("name");
                     final String finalAuthName = (passedAuthorName != null) ? passedAuthorName : "Unknown Author";
-                    System.out.println("DEBUG: Saving book with author name: " + passedAuthorName);
+                    System.out.println("book service DEBUG: Saving book with author name: " + passedAuthorName);
                     Author author = authorRepository.findByOpenLibraryAuthorId(authKey)
                             .orElseGet(() -> {
                                 Author newAuthor = new Author();

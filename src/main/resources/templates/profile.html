@@ -47,6 +47,19 @@
                 </ul>
             </div>
         </div>
+
+        <h1>Search History</h1>
+        <div class="search-history">
+            <ul>
+                <li th:each="history : ${searchHistory}">
+                    <span th:text="${#temporals.format(history.searchDate, 'dd MMMM yyyy HH:mm')}">12.12.2025 14:30</span> - 
+                    <span th:text="${history.searchCriteria}">Search Query</span>
+                </li>
+                <li th:if="${searchHistory == null or searchHistory.empty}">
+                    No search history available.
+                </li>
+            </ul>
+        </div>
     </main>
 </div>
 

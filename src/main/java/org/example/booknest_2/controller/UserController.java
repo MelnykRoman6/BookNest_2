@@ -3,6 +3,7 @@
 package org.example.booknest_2.controller;
 
 import org.example.booknest_2.dto.CollectionDTO;
+import org.example.booknest_2.dto.SearchHistoryDTO;
 import org.example.booknest_2.model.Users;
 import org.example.booknest_2.repository.UsersRepository;
 import org.example.booknest_2.service.UserService;
@@ -30,13 +31,15 @@ public class UserController {
 
         String email = currentUser.getUsername();
 
-        Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = usersRepository.findByEmail(email);
 
         List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
 
+        List<SearchHistoryDTO> userSearchHistory = userService.getSearchHistoryByEmail(email);
+
         model.addAttribute("user", user);
         model.addAttribute("collections", userCollections);
+        model.addAttribute("searchHistory", userSearchHistory);
 
         return "profile";
     }
