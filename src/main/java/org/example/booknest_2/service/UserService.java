@@ -22,9 +22,10 @@ public class UserService {
     @Autowired
     private SearchHistoryRepository searchHistoryRepository;
 
-    public List<CollectionDTO> getCollectionsByEmail(String email) {
-        System.out.println("userService debug: searching collections for user: " + email);
-        List<Collection> collections = collectionRepository.findByUsersEmail(email);
+    public List<CollectionDTO> getCollectionsByEmailorNickname(String username) {
+        System.out.println("userService debug: searching collections for user: " + username);
+        List<Collection> collections = collectionRepository.findByUsersEmail(username);
+        System.out.println("userService debug: collections found: " + collections.size());
         for (Collection col : collections) {
             System.out.println("userService debug: collection: " + col.getName());
             if (col.getBooks() == null) {

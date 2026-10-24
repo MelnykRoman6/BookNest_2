@@ -19,6 +19,9 @@ public class Users {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "nickname", unique = true)
+    private String nickname;
+
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 

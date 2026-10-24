@@ -43,7 +43,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void registerUser(String password, HttpSession session) {
+    public void registerUser(String password, String nickname, HttpSession session) {
         System.out.println("register user in");
         Users newUser = new Users();
         String email = (String) session.getAttribute("temp_email");
@@ -51,9 +51,11 @@ public class AuthService {
         if (email != null) {
             newUser.setEmail(email);
         }
-
+        
         //creates user after verif
         newUser.setVerified(true);
+        newUser.setNickname(nickname);
+        System.out.println("got nickname: " + nickname);
         newUser.setPasswordHash(passwordEncoder.encode(password));
         newUser.setDateReg(LocalDateTime.now());
         newUser = userRepository.save(newUser);

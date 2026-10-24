@@ -17,5 +17,4 @@ public class SearchHistoryDTO {
         this.searchCriteria = searchHistory.getSearchCriteria();
         this.searchDate = searchHistory.getSearchDate();
     }
-
 }

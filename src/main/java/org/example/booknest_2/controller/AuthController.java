@@ -19,8 +19,8 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register/confirm")
-    public String confirmRegistration(@RequestParam String password, HttpSession session) {
-        authService.registerUser(password, session);
+    public String confirmRegistration(@RequestParam String password, @RequestParam String nickname, HttpSession session) {
+        authService.registerUser(password, nickname, session);
         return "redirect:/login?success";
     }
 

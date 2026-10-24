@@ -22,8 +22,23 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Users user = usersRepository.findByEmail(email);
 
+        if (user == null) {
+            return loadUserByNickname(email);
+        }
+
         return new User(
                 user.getEmail(),
+                user.getPasswordHash(),
+                Collections.emptyList()
+        );
+    }
+    
+    public UserDetails loadUserByNickname(String nickname) throws UsernameNotFoundException {
+
+        Users user = usersRepository.findByNickname(nickname);
+
+        return new User(
+                user.getNickname(),
                 user.getPasswordHash(),
                 Collections.emptyList()
         );

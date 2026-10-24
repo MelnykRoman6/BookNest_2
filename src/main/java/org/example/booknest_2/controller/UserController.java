@@ -29,13 +29,27 @@ public class UserController {
             return "redirect:/login";
         }
 
-        String email = currentUser.getUsername();
+        String username = currentUser.getUsername();
+        Users user = null;
+        String userEmail = null;
 
-        Users user = usersRepository.findByEmail(email);
+        if (username.contains("@")) {
+            System.out.println("userController debug: user is logged in with email: " + username);
+            user = usersRepository.findByEmail(username);
+        } else {
+            System.out.println("userController debug: user is logged in with nickname: " + username);
+            user = usersRepository.findByNickname(username);
+        }
 
-        List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
+        userEmail = user.getEmail();
+        
+        System.out.println("USER ID: " + user.getId());
+        System.out.println("USERNAME: " + user.getEmail());
+        System.out.println("NICKNAME: " + user.getNickname());
 
-        List<SearchHistoryDTO> userSearchHistory = userService.getSearchHistoryByEmail(email);
+        List<CollectionDTO> userCollections = userService.getCollectionsByEmailorNickname(userEmail);
+
+        List<SearchHistoryDTO> userSearchHistory = userService.getSearchHistoryByEmail(userEmail);
 
         model.addAttribute("user", user);
         model.addAttribute("collections", userCollections);

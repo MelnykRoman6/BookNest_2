@@ -88,10 +88,22 @@ public class BookController {
         model.addAttribute("iaId", ia);
 
         if (currentUser != null) {
-            String email = currentUser.getUsername();
-            log.info("BookContr debug: user mail: " + email);
+            String username = currentUser.getUsername();
+            Users user = null;
+            log.info("BookContr debug: username: " + username);
 
-            List<CollectionDTO> userCollections = userService.getCollectionsByEmail(email);
+            if (username.contains("@")) {
+                System.out.println("userController debug: user is logged in with email: " + username);
+                user = usersRepository.findByEmail(username);
+            } else {
+                System.out.println("userController debug: user is logged in with nickname: " + username);
+                user = usersRepository.findByNickname(username);
+            }
+
+            String email = user.getEmail();
+            log.info("BookContr debug: user email: " + email);
+
+            List<CollectionDTO> userCollections = userService.getCollectionsByEmailorNickname(email);
             log.info("BookContr debug: collections found: " + (userCollections != null ? userCollections.size() : "null"));
 
             model.addAttribute("collections", userCollections);
