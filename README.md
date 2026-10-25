@@ -33,14 +33,14 @@ Book cards with detailed information, genres, and a list of authors.
 * Build & Dependencies: Apache Maven.
 
 ## 📦 Quick Start and Local Setup
-1. Environment Requirements
-Installed Docker and Docker Compose.
-Java Development Kit (JDK) 17 or newer.
-Git.
+1. Environment Requirements  
+* Installed Docker and Docker Compose  
+* Java Development Kit (JDK) 17 or newer  
+* Git  
 
 3. Cloning and Setup
-Clone the repository to your local machine:
-`git clone https://github.com/MelnykRoman6/BookNest_2.git`
+Clone the repository to your local machine:  
+`git clone https://github.com/MelnykRoman6/BookNest_2.git`  
 `cd BookNest_2`
 
 4. Starting the Database
