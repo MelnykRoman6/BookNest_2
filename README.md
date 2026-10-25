@@ -1,9 +1,9 @@
-📚 # BookNest 2
+# 📚 BookNest 2
 A web application for cataloging books, organizing personal reading shelves, and viewing works online with integration of open library catalogs.
 
 The project was developed on the Java / Spring Boot stack with server-side page rendering via Thymeleaf, secure authorization via Spring Security, and containerized PostgreSQL storage.
 
-🚀 ## Main Functionality
+## 🚀 Main Functionality
 ### Authentication and Security:
 User registration and login with data validation.
 Secure password hashing using the BCryptPasswordEncoder algorithm.
@@ -25,14 +25,14 @@ Book cards with detailed information, genres, and a list of authors.
 - Integration with Internet Archive API for access to open digitized editions.
 - Reading book contents via an embedded reader (reader.html) without the need to manually download large files to the device.
 
-🛠 ## Technology Stack
+## 🛠 Technology Stack
 * Backend: Java 17+, Spring Boot 3 (Spring Web, Spring Data JPA, Spring Security, Spring Mail).
 * Database: PostgreSQL, Docker / Docker Compose.
 * Frontend: HTML5, CSS3, Thymeleaf.
 * External APIs: OpenLibrary REST API, Internet Archive API.
 * Build & Dependencies: Apache Maven.
 
-📦 ## Quick Start and Local Setup
+## 📦 Quick Start and Local Setup
 1. Environment Requirements
 Installed Docker and Docker Compose.
 Java Development Kit (JDK) 17 or newer.
