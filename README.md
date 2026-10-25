@@ -47,7 +47,7 @@ Clone the repository to your local machine:
 Start the PostgreSQL database container via Docker:
 `docker compose up -d`
 
-6. Configuration Parameters
+5. Configuration Parameters  
 Check the database and mail server connection parameters in src/main/resources/application.properties:
 
 ## Properties
