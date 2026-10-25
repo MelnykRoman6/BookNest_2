@@ -38,35 +38,39 @@ Installed Docker and Docker Compose.
 Java Development Kit (JDK) 17 or newer.
 Git.
 
-2. Cloning and Setup
+3. Cloning and Setup
 Clone the repository to your local machine:
-git clone https://github.com/MelnykRoman6/BookNest_2.git
-cd BookNest_2
+`git clone https://github.com/MelnykRoman6/BookNest_2.git`
+`cd BookNest_2`
 
 4. Starting the Database
 Start the PostgreSQL database container via Docker:
-docker compose up -d
+`docker compose up -d`
 
-5. Configuration Parameters
+6. Configuration Parameters
 Check the database and mail server connection parameters in src/main/resources/application.properties:
 
 ## Properties
-### PostgreSQL Database
-spring.datasource.url=jdbc:postgresql://localhost:5432/booknest
-spring.datasource.username=postgres
-spring.datasource.password=postgres
+### PostgreSQL Database   
+```
+spring.datasource.url=jdbc:postgresql://localhost:5432/booknest  
+spring.datasource.username=postgres  
+spring.datasource.password=postgres  
 spring.jpa.hibernate.ddl-auto=update
+```
 
 ### Mail settings for account confirmation
-spring.mail.host=smtp.example.com
-spring.mail.port=587
-spring.mail.username=your-email@example.com
+```
+spring.mail.host=smtp.example.com  
+spring.mail.port=587  
+spring.mail.username=your-email@example.com  
 spring.mail.password=your-app-password
+```
 
 5. Building and Running the Application
 Run the project via Maven Wrapper:
-./mvnw spring-boot:run
-(For Windows: mvnw.cmd spring-boot:run)
+   `./mvnw spring-boot:run`
+   (For Windows: `mvnw.cmd spring-boot:run`)
 
 
 
