@@ -67,9 +67,9 @@ spring.mail.username=your-email@example.com
 spring.mail.password=your-app-password
 ```
 
-5. Building and Running the Application
-Run the project via Maven Wrapper:
-   `./mvnw spring-boot:run`
+6. Building and Running the Application  
+Run the project via Maven Wrapper:  
+   `./mvnw spring-boot:run`  
    (For Windows: `mvnw.cmd spring-boot:run`)
 
 
