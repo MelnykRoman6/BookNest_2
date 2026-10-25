@@ -38,16 +38,16 @@ The project was developed on the Java / Spring Boot stack with server-side page 
 * Java Development Kit (JDK) 17 or newer  
 * Git  
 
-3. Cloning and Setup
+2. Cloning and Setup
 Clone the repository to your local machine:  
 `git clone https://github.com/MelnykRoman6/BookNest_2.git`  
 `cd BookNest_2`
 
-4. Starting the Database
+3. Starting the Database
 Start the PostgreSQL database container via Docker:
 `docker compose up -d`
 
-5. Configuration Parameters  
+4. Configuration Parameters  
 Check the database and mail server connection parameters in src/main/resources/application.properties:
 
 ## Properties
@@ -67,7 +67,7 @@ spring.mail.username=your-email@example.com
 spring.mail.password=your-app-password
 ```
 
-6. Building and Running the Application  
+5. Building and Running the Application  
 Run the project via Maven Wrapper:  
    `./mvnw spring-boot:run`  
    (For Windows: `mvnw.cmd spring-boot:run`)
