@@ -36,7 +36,7 @@
 
                 <ul class="books-list hidden-list">
                     <li th:each="title, iter : ${col.bookTitles}">
-                        <a th:href="@{/book/{id}(id=${col.bookIds[iter.index]})}" th:text="${title}">
+                        <a th:href="@{/book/{openLibraryId}(openLibraryId=${col.bookIds[iter.index]})}" th:text="${title}">
                             Book Title
                         </a>
                     </li>

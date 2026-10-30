@@ -3,7 +3,6 @@
 package org.example.booknest_2.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.misc.LogManager;
 import org.example.booknest_2.dto.CollectionDTO;
 import org.example.booknest_2.model.Author;
 import org.example.booknest_2.model.Book;
@@ -17,15 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Controller
@@ -71,13 +65,23 @@ public class BookController {
 
         return "index";
     }
+
     @GetMapping("/book/{id}")
     public String showBookDetails(@PathVariable String id,
                                   @RequestParam(required = false) String ia,
                                   @RequestParam(value = "authorName", required = false) String authorName,
                                   Model model, @AuthenticationPrincipal UserDetails currentUser) {
 
-        Book bookToShow = bookService.getOrSaveBookDetails(id, authorName);
+        Optional<Book> existingBook = bookRepository.findByOpenLibraryId(id);
+        String iaId = null;
+        String coverId = null;
+        if (existingBook.isPresent()) {
+            Book book = existingBook.get();
+            iaId = book.getIaId();
+            coverId = book.getCoverId();
+        }
+
+        Book bookToShow = bookService.saveOrGetBookDetails(id, authorName, coverId, iaId);
 
         if (bookToShow == null) {
             return "error/404";
@@ -113,25 +117,34 @@ public class BookController {
 
         return "book-details";
     }
+
     @GetMapping("/book/{id}/read")
     public String readBook(@PathVariable String id, Model model) {
-        Book book = bookService.getOrSaveBookDetails(id, null);
+        Optional<Book> existingBook = bookRepository.findByOpenLibraryId(id);
+        String iaId = null;
+        String coverId = null;
+        String authorName = "Unknown Author";
+        if (existingBook.isPresent()) {
+            Book book = existingBook.get();
+            iaId = book.getIaId();
+            coverId = book.getCoverId();
+            if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
+                authorName = book.getAuthors().stream()
+                        .map(Author::getName)
+                        .collect(java.util.stream.Collectors.joining(", "));
+            }
+        }
+
+        Book book = bookService.saveOrGetBookDetails(id, authorName, coverId, iaId);
         if (book == null) {
             return "error/404";
         }
 
-        String iaId = bookService.fetchInternetArchiveId(book.getOpenLibraryId());
-
         model.addAttribute("book", book);
         model.addAttribute("iaId", iaId);
-
-        String authorName = "Unknown Author";
-        if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
-            authorName = book.getAuthors().stream()
-                    .map(Author::getName)
-                    .collect(java.util.stream.Collectors.joining(", "));
-        }
+        System.out.println("BookController debug: book iaid: " + iaId);
         model.addAttribute("authorName", authorName);
+        System.out.println("BookController debug: book title: " + book.getTitle());
 
         return "reader";
     }

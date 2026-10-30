@@ -27,7 +27,7 @@ public class CollectionDTO {
                     .map(Book::getTitle)
                     .collect(Collectors.toList());
             this.bookIds = entity.getBooks().stream()
-                    .map(book -> String.valueOf(book.getId()))
+                    .map(book -> String.valueOf(book.getOpenLibraryId()))
                     .collect(Collectors.toList());
         }
     }

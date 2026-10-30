@@ -41,7 +41,7 @@
             <span class="collection-label">Add to collection:</span>
 
             <form th:action="@{/collection/add-book}" method="POST" class="select-wrapper">
-                <input type="hidden" name="bookId" th:value="${book.id}" />
+                <input type="hidden" name="bookId" th:value="${book.openLibraryId}" />
 
                 <select class="select-dark" name="collectionId" required>
                     <option value="" disabled selected>Choose a collection...</option>
@@ -53,6 +53,16 @@
                 <button type="submit" class="btn-save">Save</button>
             </form>
         </div>
+
+        <div class="review-form" th:if="${currentUser != null}" style="margin-top: 15px;">
+            <span class="review-label">Add a review:</span>
+
+            <form th:action="@{/book/{id}/add-review(id=${book.openLibraryId})}" method="POST" class="review-form">
+                <textarea name="comment" placeholder="Write your review..." required></textarea>
+                <input type="number" name="rating" min="1" max="5" placeholder="Rating (1-5)" required>
+                <button type="submit" class="btn-save">Submit Review</button>
+            </form>
+        </div>   
     </div>
 
     <div class="main-content">

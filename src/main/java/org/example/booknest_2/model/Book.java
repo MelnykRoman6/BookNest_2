@@ -15,12 +15,8 @@ import java.util.Set;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Lob
-    @Column(name = "file_content", columnDefinition = "TEXT")
-    private String fileContent;
+    @Column(name = "open_library_id")
+    private String openLibraryId;
 
     @Column(nullable = false)
     private String title;
@@ -32,9 +28,6 @@ public class Book {
 
     @Column(name = "ia_id")
     private String iaId;
-
-    @Column(name = "open_library_id")
-    private String openLibraryId;
 
     @Column(name = "cover_id")
     private String coverId;

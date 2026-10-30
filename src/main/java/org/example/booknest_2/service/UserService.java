@@ -33,7 +33,7 @@ public class UserService {
             } else {
                 System.out.println("userService debug: total qta of books: " + col.getBooks().size());
                 col.getBooks().forEach(b ->
-                        System.out.println("userService debug: books in collection: ID=" + b.getId() + ", Title=" + b.getTitle())
+                        System.out.println("userService debug: books in collection: ID=" + b.getOpenLibraryId() + ", Title=" + b.getTitle())
                 );
             }
         }

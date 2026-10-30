@@ -156,6 +156,18 @@ body {
     color: #bbb;
 }
 
+.review-form {
+    background: #2d2d2d;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.review-label {
+    font-size: 13px;
+    color: #bbb;
+}
+
 .select-wrapper {
     display: flex;
     gap: 8px;
